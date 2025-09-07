@@ -4,34 +4,34 @@ Feature: Check for more recent versions
   @require-mysql
   Scenario: Check for update via Version Check API
     Given a WP install
-    And I try `wp theme install twentytwenty --activate`
+    And I try `fp theme install twentytwenty --activate`
 
-    When I run `wp core download --version=5.8 --force`
+    When I run `fp core download --version=5.8 --force`
     Then STDOUT should not be empty
 
-    When I run `wp core check-update --format=csv`
+    When I run `fp core check-update --format=csv`
     Then STDOUT should match #{WP_VERSION-latest},major,https://downloads.(w|wordpress).org/release/wordpress-{WP_VERSION-latest}.zip#
     And STDOUT should match #{WP_VERSION-5.8-latest},minor,https://downloads.(w|wordpress).org/release/wordpress-{WP_VERSION-5.8-latest}-partial-0.zip#
 
-    When I run `wp core check-update --format=count`
+    When I run `fp core check-update --format=count`
     Then STDOUT should be:
       """
       2
       """
 
-    When I run `wp core check-update --major --format=csv`
+    When I run `fp core check-update --major --format=csv`
     Then STDOUT should match #{WP_VERSION-latest},major,https://downloads.(w|wordpress).org/release/wordpress-{WP_VERSION-latest}.zip#
 
-    When I run `wp core check-update --major --format=count`
+    When I run `fp core check-update --major --format=count`
     Then STDOUT should be:
       """
       1
       """
 
-    When I run `wp core check-update --minor --format=csv`
+    When I run `fp core check-update --minor --format=csv`
     Then STDOUT should match #{WP_VERSION-5.8-latest},minor,https://downloads.(w|wordpress).org/release/wordpress-{WP_VERSION-5.8-latest}-partial-0.zip#
 
-    When I run `wp core check-update --minor --format=count`
+    When I run `fp core check-update --minor --format=count`
     Then STDOUT should be:
       """
       1
@@ -42,30 +42,30 @@ Feature: Check for more recent versions
     And a setup.php file:
       """
       <?php
-      global $wp_version;
+      global $fp_version;
 
       $obj = new stdClass;
       $obj->updates = [];
       $obj->last_checked = strtotime( '1 January 2099' );
-      $obj->version_checked = $wp_version;
+      $obj->version_checked = $fp_version;
       $obj->translations = [];
       set_site_transient( 'update_core', $obj );
       """
-    And I run `wp eval-file setup.php`
+    And I run `fp eval-file setup.php`
 
-    When I run `wp core check-update`
+    When I run `fp core check-update`
     Then STDOUT should be:
       """
       Success: WordPress is at the latest version.
       """
 
-    When I run `wp core check-update --format=json`
+    When I run `fp core check-update --format=json`
     Then STDOUT should be:
       """
       []
       """
 
-    When I run `wp core check-update --format=yaml`
+    When I run `fp core check-update --format=yaml`
     Then STDOUT should be:
       """
       ---

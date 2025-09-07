@@ -2,15 +2,15 @@ Feature: Find version for WordPress install
 
   Scenario: Verify core version
     Given a WP install
-    And I run `wp core download --version=4.4.2 --force`
+    And I run `fp core download --version=4.4.2 --force`
 
-    When I run `wp core version`
+    When I run `fp core version`
     Then STDOUT should be:
       """
       4.4.2
       """
 
-    When I run `wp core version --extra`
+    When I run `fp core version --extra`
     Then STDOUT should be:
       """
       WordPress version: 4.4.2
@@ -23,13 +23,13 @@ Feature: Find version for WordPress install
     Given an empty directory
     And an empty cache
 
-    When I run `wp core download --version=4.4.2 --locale=de_DE`
+    When I run `fp core download --version=4.4.2 --locale=de_DE`
     Then STDOUT should contain:
       """
       Success: WordPress downloaded.
       """
 
-    When I run `wp core version --extra`
+    When I run `fp core version --extra`
     Then STDOUT should be:
       """
       WordPress version: 4.4.2

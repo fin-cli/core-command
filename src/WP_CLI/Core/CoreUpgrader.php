@@ -12,7 +12,7 @@ use WP_Filesystem_Base;
 /**
  * A Core Upgrader class that caches the download, and uses cached if available.
  *
- * @package wp-cli
+ * @package fp-cli
  */
 class CoreUpgrader extends DefaultCoreUpgrader {
 
@@ -87,7 +87,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		$filename  = pathinfo( $package, PATHINFO_FILENAME );
 		$extension = pathinfo( $package, PATHINFO_EXTENSION );
 
-		$temp = Utils\get_temp_dir() . uniqid( 'wp_' ) . ".{$extension}";
+		$temp = Utils\get_temp_dir() . uniqid( 'fp_' ) . ".{$extension}";
 		register_shutdown_function(
 			function () use ( $temp ) {
 				if ( file_exists( $temp ) ) {
@@ -97,7 +97,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		);
 
 		$cache     = WP_CLI::get_cache();
-		$update    = $GLOBALS['wpcli_core_update_obj'];
+		$update    = $GLOBALS['fpcli_core_update_obj'];
 		$cache_key = "core/{$filename}-{$update->locale}.{$extension}";
 
 		/**
@@ -149,8 +149,8 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 	 *
 	 * @access public
 	 *
-	 * @global WP_Filesystem_Base $wp_filesystem Subclass
-	 * @global callable           $_wp_filesystem_direct_method
+	 * @global WP_Filesystem_Base $fp_filesystem Subclass
+	 * @global callable           $_fp_filesystem_direct_method
 	 *
 	 * @param object $current Response object for whether WordPress is current.
 	 * @param array  $args {
@@ -183,8 +183,8 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		if ( ! ( error_reporting() & $errno ) ) {
 			return false;
 		}
-		// If not in "wp-admin/includes/update.php", default.
-		$update_php = 'wp-admin/includes/update.php';
+		// If not in "fp-admin/includes/update.php", default.
+		$update_php = 'fp-admin/includes/update.php';
 		if ( 0 !== substr_compare( $errfile, $update_php, -strlen( $update_php ) ) ) {
 			return false;
 		}

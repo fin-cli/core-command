@@ -1,7 +1,7 @@
 Feature: Install WordPress core
 
   # TODO: Requires investigation for SQLite support.
-  # See https://github.com/wp-cli/core-command/issues/244
+  # See https://github.com/fp-cli/core-command/issues/244
   @require-mysql
   Scenario: Two WordPress installs sharing the same user table won't update existing user
     Given an empty directory
@@ -13,13 +13,13 @@ Feature: Install WordPress core
       define( 'CUSTOM_USER_META_TABLE', 'secondusermeta' );
       """
 
-    When I run `wp --path=second user create testadmin testadmin@example.org --role=administrator`
+    When I run `fp --path=second user create testadmin testadmin@example.org --role=administrator`
     Then STDOUT should contain:
       """
       Success: Created user 2.
       """
 
-    When I run `wp --path=second db tables`
+    When I run `fp --path=second db tables`
     Then STDOUT should contain:
       """
       secondposts
@@ -29,51 +29,51 @@ Feature: Install WordPress core
       secondusers
       """
 
-    When I run `wp --path=second user list --field=user_login`
+    When I run `fp --path=second user list --field=user_login`
     Then STDOUT should be:
       """
       admin
       testadmin
       """
 
-    When I run `wp --path=second user get testadmin --field=user_pass`
+    When I run `fp --path=second user get testadmin --field=user_pass`
     Then save STDOUT as {ORIGINAL_PASSWORD}
 
-    When I run `wp config create {CORE_CONFIG_SETTINGS} --skip-check --extra-php < extra-config`
+    When I run `fp config create {CORE_CONFIG_SETTINGS} --skip-check --extra-php < extra-config`
     Then STDOUT should be:
       """
-      Success: Generated 'wp-config.php' file.
+      Success: Generated 'fp-config.php' file.
       """
 
-    When I run `wp core install --url=example.org --title=Test --admin_user=testadmin --admin_email=testadmin@example.com --admin_password=newpassword`
+    When I run `fp core install --url=example.org --title=Test --admin_user=testadmin --admin_email=testadmin@example.com --admin_password=nefpassword`
     Then STDOUT should contain:
       """
       Success: WordPress installed successfully.
       """
 
-    When I run `wp user list --field=user_login`
+    When I run `fp user list --field=user_login`
     Then STDOUT should be:
       """
       admin
       testadmin
       """
 
-    When I run `wp user get testadmin --field=email`
+    When I run `fp user get testadmin --field=email`
     Then STDOUT should be:
       """
       testadmin@example.org
       """
 
-    When I run `wp user get testadmin --field=user_pass`
+    When I run `fp user get testadmin --field=user_pass`
     Then STDOUT should be:
       """
       {ORIGINAL_PASSWORD}
       """
 
-    When I run `wp db tables`
+    When I run `fp db tables`
     Then STDOUT should contain:
       """
-      wp_posts
+      fp_posts
       """
     And STDOUT should contain:
       """
@@ -81,11 +81,11 @@ Feature: Install WordPress core
       """
     And STDOUT should not contain:
       """
-      wp_users
+      fp_users
       """
 
   # TODO: Requires investigation for SQLite support.
-  # See https://github.com/wp-cli/core-command/issues/244
+  # See https://github.com/fp-cli/core-command/issues/244
   @require-mysql
   Scenario: Two WordPress installs sharing the same user table will create new user
     Given an empty directory
@@ -97,7 +97,7 @@ Feature: Install WordPress core
       define( 'CUSTOM_USER_META_TABLE', 'secondusermeta' );
       """
 
-    When I run `wp --path=second db tables`
+    When I run `fp --path=second db tables`
     Then STDOUT should contain:
       """
       secondposts
@@ -107,48 +107,48 @@ Feature: Install WordPress core
       secondusers
       """
 
-    When I run `wp --path=second user list --field=user_login`
+    When I run `fp --path=second user list --field=user_login`
     Then STDOUT should be:
       """
       admin
       """
 
-    When I run `wp config create {CORE_CONFIG_SETTINGS} --skip-check --extra-php < extra-config`
+    When I run `fp config create {CORE_CONFIG_SETTINGS} --skip-check --extra-php < extra-config`
     Then STDOUT should be:
       """
-      Success: Generated 'wp-config.php' file.
+      Success: Generated 'fp-config.php' file.
       """
 
-    When I run `wp core install --url=example.org --title=Test --admin_user=testadmin --admin_email=testadmin@example.com --admin_password=newpassword`
+    When I run `fp core install --url=example.org --title=Test --admin_user=testadmin --admin_email=testadmin@example.com --admin_password=nefpassword`
     Then STDOUT should contain:
       """
       Success: WordPress installed successfully.
       """
 
-    When I run `wp user list --field=user_login`
+    When I run `fp user list --field=user_login`
     Then STDOUT should be:
       """
       admin
       testadmin
       """
 
-    When I run `wp --path=second user list --field=user_login`
+    When I run `fp --path=second user list --field=user_login`
     Then STDOUT should be:
       """
       admin
       testadmin
       """
 
-    When I run `wp user get testadmin --field=email`
+    When I run `fp user get testadmin --field=email`
     Then STDOUT should be:
       """
       testadmin@example.com
       """
 
-    When I run `wp db tables`
+    When I run `fp db tables`
     Then STDOUT should contain:
       """
-      wp_posts
+      fp_posts
       """
     And STDOUT should contain:
       """
@@ -156,17 +156,17 @@ Feature: Install WordPress core
       """
     And STDOUT should not contain:
       """
-      wp_users
+      fp_users
       """
 
   Scenario: Install WordPress without specifying the admin password
     Given an empty directory
     And WP files
-    And wp-config.php
+    And fp-config.php
     And a database
 
-    # Old versions of WP can generate wpdb database errors if the WP tables don't exist, so STDERR may or may not be empty
-    When I try `wp core install --url=localhost:8001 --title=Test --admin_user=wpcli --admin_email=wpcli@example.org`
+    # Old versions of WP can generate fpdb database errors if the WP tables don't exist, so STDERR may or may not be empty
+    When I try `fp core install --url=localhost:8001 --title=Test --admin_user=fpcli --admin_email=fpcli@example.org`
     Then STDOUT should contain:
       """
       Admin password:
@@ -183,24 +183,24 @@ Feature: Install WordPress core
     And an empty cache
     And a database
 
-    When I run `wp core download --version=3.7 --locale=de_DE`
+    When I run `fp core download --version=3.7 --locale=de_DE`
     And save STDOUT 'Downloading WordPress ([\d\.]+)' as {VERSION}
     And I run `echo {VERSION}`
     Then STDOUT should contain:
       """
       3.7
       """
-    And the wp-settings.php file should exist
+    And the fp-settings.php file should exist
     And the {SUITE_CACHE_DIR}/core/wordpress-{VERSION}-de_DE.tar.gz file should exist
 
-    When I run `wp config create --dbname={DB_NAME} --dbuser={DB_USER} --dbpass={DB_PASSWORD} --dbhost={DB_HOST} --locale=de_DE --skip-check`
+    When I run `fp config create --dbname={DB_NAME} --dbuser={DB_USER} --dbpass={DB_PASSWORD} --dbhost={DB_HOST} --locale=de_DE --skip-check`
     Then STDOUT should be:
       """
-      Success: Generated 'wp-config.php' file.
+      Success: Generated 'fp-config.php' file.
       """
 
-    # Old versions of WP can generate wpdb database errors if the WP tables don't exist, so STDERR may or may not be empty
-    When I try `wp core install --url=example.org --title=Test --admin_user=testadmin --admin_email=testadmin@example.com --admin_password=newpassword --locale=de_DE --skip-email`
+    # Old versions of WP can generate fpdb database errors if the WP tables don't exist, so STDERR may or may not be empty
+    When I try `fp core install --url=example.org --title=Test --admin_user=testadmin --admin_email=testadmin@example.com --admin_password=nefpassword --locale=de_DE --skip-email`
     Then STDERR should contain:
       """
       Warning: The flag --locale=de_DE is being ignored as it requires WordPress 4.0+.
@@ -210,13 +210,13 @@ Feature: Install WordPress core
       Success: WordPress installed successfully.
       """
 
-    When I run `wp core version`
+    When I run `fp core version`
     Then STDOUT should contain:
       """
       3.7
       """
 
-    When I run `wp taxonomy list`
+    When I run `fp taxonomy list`
     Then STDOUT should contain:
       """
       Kategorien
@@ -229,36 +229,36 @@ Feature: Install WordPress core
     And an empty cache
     And a database
 
-    When I run `wp core download --version=5.6 --locale=de_DE`
+    When I run `fp core download --version=5.6 --locale=de_DE`
     And save STDOUT 'Downloading WordPress ([\d\.]+)' as {VERSION}
     And I run `echo {VERSION}`
     Then STDOUT should contain:
       """
       5.6
       """
-    And the wp-settings.php file should exist
+    And the fp-settings.php file should exist
     And the {SUITE_CACHE_DIR}/core/wordpress-{VERSION}-de_DE.tar.gz file should exist
 
-    When I run `wp config create --dbname={DB_NAME} --dbuser={DB_USER} --dbpass={DB_PASSWORD} --dbhost={DB_HOST} --locale=de_DE --skip-check`
+    When I run `fp config create --dbname={DB_NAME} --dbuser={DB_USER} --dbpass={DB_PASSWORD} --dbhost={DB_HOST} --locale=de_DE --skip-check`
     Then STDOUT should be:
       """
-      Success: Generated 'wp-config.php' file.
+      Success: Generated 'fp-config.php' file.
       """
 
-    # Old versions of WP can generate wpdb database errors if the WP tables don't exist, so STDERR may or may not be empty
-    When I run `wp core install --url=example.org --title=Test --admin_user=testadmin --admin_email=testadmin@example.com --admin_password=newpassword --locale=de_DE --skip-email`
+    # Old versions of WP can generate fpdb database errors if the WP tables don't exist, so STDERR may or may not be empty
+    When I run `fp core install --url=example.org --title=Test --admin_user=testadmin --admin_email=testadmin@example.com --admin_password=nefpassword --locale=de_DE --skip-email`
     Then STDOUT should contain:
       """
       Success: WordPress installed successfully.
       """
 
-    When I run `wp core version`
+    When I run `fp core version`
     Then STDOUT should contain:
       """
       5.6
       """
 
-    When I run `wp taxonomy list`
+    When I run `fp taxonomy list`
     Then STDOUT should contain:
       """
       Kategorien
@@ -267,11 +267,11 @@ Feature: Install WordPress core
   Scenario: Install WordPress multisite without specifying the password
     Given an empty directory
     And WP files
-    And wp-config.php
+    And fp-config.php
     And a database
 
-    # Old versions of WP can generate wpdb database errors if the WP tables don't exist, so STDERR may or may not be empty
-    When I try `wp core multisite-install --url=foobar.org --title=Test --admin_user=wpcli --admin_email=admin@example.com`
+    # Old versions of WP can generate fpdb database errors if the WP tables don't exist, so STDERR may or may not be empty
+    When I try `fp core multisite-install --url=foobar.org --title=Test --admin_user=fpcli --admin_email=admin@example.com`
     Then STDOUT should contain:
       """
       Admin password:
@@ -282,20 +282,20 @@ Feature: Install WordPress core
       """
     And the return code should be 0
 
-  Scenario: Install WordPress multisite without adding multisite constants to wp-config file
+  Scenario: Install WordPress multisite without adding multisite constants to fp-config file
     Given an empty directory
     And WP files
-    And wp-config.php
+    And fp-config.php
     And a database
 
-    When I run `wp core multisite-install --url=foobar.org --title=Test --admin_user=wpcli --admin_email=admin@example.com --admin_password=password --skip-config`
+    When I run `fp core multisite-install --url=foobar.org --title=Test --admin_user=fpcli --admin_email=admin@example.com --admin_password=password --skip-config`
     Then STDOUT should contain:
       """
-      Addition of multisite constants to 'wp-config.php' skipped. You need to add them manually:
+      Addition of multisite constants to 'fp-config.php' skipped. You need to add them manually:
       """
 
   @require-mysql
-  Scenario: Install WordPress multisite with existing multisite constants in wp-config file
+  Scenario: Install WordPress multisite with existing multisite constants in fp-config file
     Given an empty directory
     And WP files
     And a database
@@ -311,13 +311,13 @@ Feature: Install WordPress core
       define( 'BLOG_ID_CURRENT_SITE', 1 );
       """
 
-    When I run `wp config create {CORE_CONFIG_SETTINGS} --extra-php < extra-config`
+    When I run `fp config create {CORE_CONFIG_SETTINGS} --extra-php < extra-config`
     Then STDOUT should be:
       """
-      Success: Generated 'wp-config.php' file.
+      Success: Generated 'fp-config.php' file.
       """
 
-    When I run `wp core multisite-install --url=foobar.org --title=Test --admin_user=wpcli --admin_email=admin@example.com --admin_password=password --skip-config`
+    When I run `fp core multisite-install --url=foobar.org --title=Test --admin_user=fpcli --admin_email=admin@example.com --admin_password=password --skip-config`
     Then STDOUT should be:
       """
       Created single site database tables.
@@ -325,7 +325,7 @@ Feature: Install WordPress core
       Success: Network installed. Don't forget to set up rewrite rules (and a .htaccess file, if using Apache).
       """
 
-    When I run `wp db query "select * from wp_sitemeta where meta_key = 'site_admins' and meta_value = ''"`
+    When I run `fp db query "select * from fp_sitemeta where meta_key = 'site_admins' and meta_value = ''"`
     Then STDOUT should be:
       """
       """

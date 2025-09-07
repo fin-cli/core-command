@@ -13,20 +13,20 @@ use WP_CLI\WpOrgApi;
  * ## EXAMPLES
  *
  *     # Download WordPress core
- *     $ wp core download --locale=nl_NL
+ *     $ fp core download --locale=nl_NL
  *     Downloading WordPress 4.5.2 (nl_NL)...
  *     md5 hash verified: c5366d05b521831dd0b29dfc386e56a5
  *     Success: WordPress downloaded.
  *
  *     # Install WordPress
- *     $ wp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
+ *     $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
  *     Success: WordPress installed successfully.
  *
  *     # Display the WordPress version
- *     $ wp core version
+ *     $ fp core version
  *     4.5.2
  *
- * @package wp-cli
+ * @package fp-cli
  */
 class Core_Command extends WP_CLI_Command {
 
@@ -67,7 +67,7 @@ class Core_Command extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     $ wp core check-update
+	 *     $ fp core check-update
 	 *     +---------+-------------+-------------------------------------------------------------+
 	 *     | version | update_type | package_url                                                 |
 	 *     +---------+-------------+-------------------------------------------------------------+
@@ -133,12 +133,12 @@ class Core_Command extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     $ wp core download --locale=nl_NL
+	 *     $ fp core download --locale=nl_NL
 	 *     Downloading WordPress 4.5.2 (nl_NL)...
 	 *     md5 hash verified: c5366d05b521831dd0b29dfc386e56a5
 	 *     Success: WordPress downloaded.
 	 *
-	 * @when before_wp_load
+	 * @when before_fp_load
 	 *
 	 * @param array{0?: string} $args Positional arguments.
 	 * @param array{path?: string, locale?: string, version?: string, 'skip-content'?: bool, force?: bool, insecure?: bool, extract?: bool} $assoc_args Associative arguments.
@@ -152,10 +152,10 @@ class Core_Command extends WP_CLI_Command {
 			: ABSPATH;
 
 		// Check for files if WordPress already present or not.
-		$wordpress_present = is_readable( $download_dir . 'wp-load.php' )
-			|| is_readable( $download_dir . 'wp-mail.php' )
-			|| is_readable( $download_dir . 'wp-cron.php' )
-			|| is_readable( $download_dir . 'wp-links-opml.php' );
+		$wordpress_present = is_readable( $download_dir . 'fp-load.php' )
+			|| is_readable( $download_dir . 'fp-mail.php' )
+			|| is_readable( $download_dir . 'fp-cron.php' )
+			|| is_readable( $download_dir . 'fp-links-opml.php' );
 
 		if ( $wordpress_present && ! Utils\get_flag_value( $assoc_args, 'force' ) ) {
 			WP_CLI::error( 'WordPress files seem to already be present here.' );
@@ -235,9 +235,9 @@ class Core_Command extends WP_CLI_Command {
 		}
 
 		$from_version = '';
-		if ( file_exists( $download_dir . 'wp-includes/version.php' ) ) {
-			$wp_details   = self::get_wp_details( $download_dir );
-			$from_version = $wp_details['wp_version'];
+		if ( file_exists( $download_dir . 'fp-includes/version.php' ) ) {
+			$fp_details   = self::get_fp_details( $download_dir );
+			$from_version = $fp_details['fp_version'];
 		}
 
 		if ( $from_url ) {
@@ -287,7 +287,7 @@ class Core_Command extends WP_CLI_Command {
 		if ( ! $cache_file || $bad_cache ) {
 			// We need to use a temporary file because piping from cURL to tar is flaky
 			// on MinGW (and probably in other environments too).
-			$temp = Utils\get_temp_dir() . uniqid( 'wp_' ) . ".{$extension}";
+			$temp = Utils\get_temp_dir() . uniqid( 'fp_' ) . ".{$extension}";
 			register_shutdown_function(
 				function () use ( $temp ) {
 					if ( file_exists( $temp ) ) {
@@ -372,16 +372,16 @@ class Core_Command extends WP_CLI_Command {
 	 *
 	 *     # Bash script for checking if WordPress is not installed.
 	 *
-	 *     if ! wp core is-installed 2>/dev/null; then
+	 *     if ! fp core is-installed 2>/dev/null; then
 	 *         # WP is not installed. Let's try installing it.
-	 *         wp core install
+	 *         fp core install
 	 *     fi
 	 *
 	 *     # Bash script for checking if WordPress is installed, with fallback.
 	 *
-	 *     if wp core is-installed 2>/dev/null; then
+	 *     if fp core is-installed 2>/dev/null; then
 	 *         # WP is installed. Let's do some things we should only do in a confirmed WP environment.
-	 *         wp core verify-checksums
+	 *         fp core verify-checksums
 	 *     else
 	 *         # Fallback if WP is not installed.
 	 *         echo 'Hey Friend, you are in the wrong spot. Move in to your WordPress directory and try again.'
@@ -408,9 +408,9 @@ class Core_Command extends WP_CLI_Command {
 	 * in seconds or less.
 	 *
 	 * Note: if you've installed WordPress in a subdirectory, then you'll need
-	 * to `wp option update siteurl` after `wp core install`. For instance, if
-	 * WordPress is installed in the `/wp` directory and your domain is example.com,
-	 * then you'll need to run `wp option update siteurl http://example.com/wp` for
+	 * to `fp option update siteurl` after `fp core install`. For instance, if
+	 * WordPress is installed in the `/fp` directory and your domain is example.com,
+	 * then you'll need to run `fp option update siteurl http://example.com/fp` for
 	 * your WordPress installation to function properly.
 	 *
 	 * Note: When using custom user tables (e.g. `CUSTOM_USER_TABLE`), the admin
@@ -443,11 +443,11 @@ class Core_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Install WordPress in 5 seconds
-	 *     $ wp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
+	 *     $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
 	 *     Success: WordPress installed successfully.
 	 *
 	 *     # Install WordPress without disclosing admin_password to bash history
-	 *     $ wp core install --url=example.com --title=Example --admin_user=supervisor --admin_email=info@example.com --prompt=admin_password < admin_password.txt
+	 *     $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_email=info@example.com --prompt=admin_password < admin_password.txt
 	 *
 	 * @param string[] $args Positional arguments. Unused.
 	 * @param array{url: string, title: string, admin_user: string, admin_password?: string, admin_email: string, locale?: string, 'skip-email'?: bool} $assoc_args Associative arguments.
@@ -464,7 +464,7 @@ class Core_Command extends WP_CLI_Command {
 	 * Transforms an existing single-site installation into a multisite installation.
 	 *
 	 * Creates the multisite database tables, and adds the multisite constants
-	 * to wp-config.php.
+	 * to fp-config.php.
 	 *
 	 * For those using WordPress with Apache, remember to update the `.htaccess`
 	 * file with the appropriate multisite rewrite rules.
@@ -487,13 +487,13 @@ class Core_Command extends WP_CLI_Command {
 	 * : If passed, the network will use subdomains, instead of subdirectories. Doesn't work with 'localhost'.
 	 *
 	 * [--skip-config]
-	 * : Don't add multisite constants to wp-config.php.
+	 * : Don't add multisite constants to fp-config.php.
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     $ wp core multisite-convert
+	 *     $ fp core multisite-convert
 	 *     Set up multisite database tables.
-	 *     Added multisite constants to wp-config.php.
+	 *     Added multisite constants to fp-config.php.
 	 *     Success: Network installed. Don't forget to set up rewrite rules.
 	 *
 	 * @subcommand multisite-convert
@@ -528,7 +528,7 @@ class Core_Command extends WP_CLI_Command {
 	 *
 	 * Creates the WordPress tables in the database using the URL, title, and
 	 * default admin user details provided. Then, creates the multisite tables
-	 * in the database and adds multisite constants to the wp-config.php.
+	 * in the database and adds multisite constants to the fp-config.php.
 	 *
 	 * For those using WordPress with Apache, remember to update the `.htaccess`
 	 * file with the appropriate multisite rewrite rules.
@@ -566,16 +566,16 @@ class Core_Command extends WP_CLI_Command {
 	 * : Don't send an email notification to the new admin user.
 	 *
 	 * [--skip-config]
-	 * : Don't add multisite constants to wp-config.php.
+	 * : Don't add multisite constants to fp-config.php.
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     $ wp core multisite-install --title="Welcome to the WordPress" \
+	 *     $ fp core multisite-install --title="Welcome to the WordPress" \
 	 *     > --admin_user="admin" --admin_password="password" \
 	 *     > --admin_email="user@example.com"
 	 *     Single site database tables already present.
 	 *     Set up multisite database tables.
-	 *     Added multisite constants to wp-config.php.
+	 *     Added multisite constants to fp-config.php.
 	 *     Success: Network installed. Don't forget to set up rewrite rules.
 	 *
 	 * @subcommand multisite-install
@@ -648,9 +648,9 @@ class Core_Command extends WP_CLI_Command {
 		}
 
 		if ( true === Utils\get_flag_value( $assoc_args, 'skip-email' ) ) {
-			if ( ! function_exists( 'wp_new_blog_notification' ) ) {
+			if ( ! function_exists( 'fp_new_blog_notification' ) ) {
 				// @phpstan-ignore function.inner
-				function wp_new_blog_notification() {
+				function fp_new_blog_notification() {
 					// Silence is golden
 				}
 			}
@@ -658,7 +658,7 @@ class Core_Command extends WP_CLI_Command {
 			add_filter( 'send_site_admin_email_change_email', '__return_false' );
 		}
 
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		require_once ABSPATH . 'fp-admin/includes/upgrade.php';
 
 		$defaults = [
 			'title'          => '',
@@ -669,7 +669,7 @@ class Core_Command extends WP_CLI_Command {
 
 		$defaults['locale'] = '';
 
-		$args = wp_parse_args( $assoc_args, $defaults );
+		$args = fp_parse_args( $assoc_args, $defaults );
 
 		// Support prompting for the `--url=<url>`,
 		// which is normally a runtime argument
@@ -684,7 +684,7 @@ class Core_Command extends WP_CLI_Command {
 			WP_CLI::error( "The '{$args['admin_email']}' email address is invalid." );
 		}
 
-		$result = wp_install(
+		$result = fp_install(
 			$args['title'],
 			$args['admin_user'],
 			$args['admin_email'],
@@ -694,7 +694,7 @@ class Core_Command extends WP_CLI_Command {
 			$args['locale']
 		);
 
-		if ( ! empty( $GLOBALS['wpdb']->last_error ) ) {
+		if ( ! empty( $GLOBALS['fpdb']->last_error ) ) {
 			WP_CLI::error( 'Installation produced database errors, and may have partially or completely failed.' );
 		}
 
@@ -703,7 +703,7 @@ class Core_Command extends WP_CLI_Command {
 		}
 
 		// Confirm the uploads directory exists
-		$upload_dir = wp_upload_dir();
+		$upload_dir = fp_upload_dir();
 		if ( ! empty( $upload_dir['error'] ) ) {
 			WP_CLI::warning( $upload_dir['error'] );
 		}
@@ -712,9 +712,9 @@ class Core_Command extends WP_CLI_Command {
 	}
 
 	private function multisite_convert_( $assoc_args ) {
-		global $wpdb;
+		global $fpdb;
 
-		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+		require_once ABSPATH . 'fp-admin/includes/upgrade.php';
 
 		$domain = self::get_clean_basedomain();
 		if ( 'localhost' === $domain && ! empty( $assoc_args['subdomains'] ) ) {
@@ -722,8 +722,8 @@ class Core_Command extends WP_CLI_Command {
 		}
 
 		// need to register the multisite tables manually for some reason
-		foreach ( $wpdb->tables( 'ms_global' ) as $table => $prefixed_table ) {
-			$wpdb->$table = $prefixed_table;
+		foreach ( $fpdb->tables( 'ms_global' ) as $table => $prefixed_table ) {
+			$fpdb->$table = $prefixed_table;
 		}
 
 		install_network();
@@ -742,7 +742,7 @@ class Core_Command extends WP_CLI_Command {
 			$assoc_args['subdomains']
 		);
 
-		$site_id = $wpdb->get_var( "SELECT id FROM $wpdb->site" );
+		$site_id = $fpdb->get_var( "SELECT id FROM $fpdb->site" );
 		$site_id = ( null === $site_id ) ? 1 : (int) $site_id;
 
 		if ( true === $result ) {
@@ -780,25 +780,25 @@ define( 'SITE_ID_CURRENT_SITE', {$site_id} );
 define( 'BLOG_ID_CURRENT_SITE', 1 );
 EOT;
 
-			$wp_config_path = Utils\locate_wp_config();
+			$fp_config_path = Utils\locate_fp_config();
 			if ( true === Utils\get_flag_value( $assoc_args, 'skip-config' ) ) {
-				WP_CLI::log( "Addition of multisite constants to 'wp-config.php' skipped. You need to add them manually:\n{$ms_config}" );
-			} elseif ( is_writable( $wp_config_path ) && self::modify_wp_config( $ms_config ) ) {
-				WP_CLI::log( "Added multisite constants to 'wp-config.php'." );
+				WP_CLI::log( "Addition of multisite constants to 'fp-config.php' skipped. You need to add them manually:\n{$ms_config}" );
+			} elseif ( is_writable( $fp_config_path ) && self::modify_fp_config( $ms_config ) ) {
+				WP_CLI::log( "Added multisite constants to 'fp-config.php'." );
 			} else {
-				WP_CLI::warning( "Multisite constants could not be written to 'wp-config.php'. You may need to add them manually:\n{$ms_config}" );
+				WP_CLI::warning( "Multisite constants could not be written to 'fp-config.php'. You may need to add them manually:\n{$ms_config}" );
 			}
 		} else {
 			/* Multisite constants are defined, therefore we already have an empty site_admins site meta.
 			 *
 			 * Code based on parts of delete_network_option. */
-			$rows = $wpdb->get_results( "SELECT meta_id, site_id FROM {$wpdb->sitemeta} WHERE meta_key = 'site_admins' AND meta_value = ''" );
+			$rows = $fpdb->get_results( "SELECT meta_id, site_id FROM {$fpdb->sitemeta} WHERE meta_key = 'site_admins' AND meta_value = ''" );
 
 			foreach ( $rows as $row ) {
-				wp_cache_delete( "{$row->site_id}:site_admins", 'site-options' );
+				fp_cache_delete( "{$row->site_id}:site_admins", 'site-options' );
 
-				$wpdb->delete(
-					$wpdb->sitemeta,
+				$fpdb->delete(
+					$fpdb->sitemeta,
 					[ 'meta_id' => $row->meta_id ]
 				);
 			}
@@ -816,7 +816,7 @@ EOT;
 		$subdomain_install,
 		$site_user
 	) {
-		global $wpdb, $current_site, $wp_rewrite;
+		global $fpdb, $current_site, $fp_rewrite;
 
 		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- This is meant to replace Core functionality.
 		$current_site            = new stdClass();
@@ -829,16 +829,16 @@ EOT;
 			'path'       => $path,
 			'registered' => current_time( 'mysql' ),
 		];
-		$wpdb->insert( $wpdb->blogs, $blog_data );
-		$current_site->blog_id = $wpdb->insert_id;
-		$blog_id               = $wpdb->insert_id;
+		$fpdb->insert( $fpdb->blogs, $blog_data );
+		$current_site->blog_id = $fpdb->insert_id;
+		$blog_id               = $fpdb->insert_id;
 		update_user_meta( $site_user->ID, 'source_domain', $domain );
 		update_user_meta( $site_user->ID, 'primary_blog', $blog_id );
 
 		if ( $subdomain_install ) {
-			$wp_rewrite->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+			$fp_rewrite->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
 		} else {
-			$wp_rewrite->set_permalink_structure( '/blog/%year%/%monthnum%/%day%/%postname%/' );
+			$fp_rewrite->set_permalink_structure( '/blog/%year%/%monthnum%/%day%/%postname%/' );
 		}
 
 		flush_rewrite_rules();
@@ -860,11 +860,11 @@ EOT;
 		update_site_option( 'site_admins', $site_admins );
 	}
 
-	private static function modify_wp_config( $content ) {
-		$wp_config_path = Utils\locate_wp_config();
+	private static function modify_fp_config( $content ) {
+		$fp_config_path = Utils\locate_fp_config();
 
 		$token           = "/* That's all, stop editing!";
-		$config_contents = (string) file_get_contents( $wp_config_path );
+		$config_contents = (string) file_get_contents( $fp_config_path );
 		if ( false === strpos( $config_contents, $token ) ) {
 			return false;
 		}
@@ -874,7 +874,7 @@ EOT;
 		$content = trim( $content );
 
 		file_put_contents(
-			$wp_config_path,
+			$fp_config_path,
 			"{$before}\n\n{$content}\n\n{$token}{$after}"
 		);
 
@@ -905,26 +905,26 @@ EOT;
 	 * ## EXAMPLES
 	 *
 	 *     # Display the WordPress version
-	 *     $ wp core version
+	 *     $ fp core version
 	 *     4.5.2
 	 *
 	 *     # Display WordPress version along with other information
-	 *     $ wp core version --extra
+	 *     $ fp core version --extra
 	 *     WordPress version: 4.5.2
 	 *     Database revision: 36686
 	 *     TinyMCE version:   4.310 (4310-20160418)
 	 *     Package language:  en_US
 	 *
-	 * @when before_wp_load
+	 * @when before_fp_load
 	 *
 	 * @param string[] $args Positional arguments. Unused.
 	 * @param array{extra?: bool} $assoc_args Associative arguments.
 	 */
 	public function version( $args = [], $assoc_args = [] ) {
-		$details = self::get_wp_details();
+		$details = self::get_fp_details();
 
 		if ( ! Utils\get_flag_value( $assoc_args, 'extra' ) ) {
-			WP_CLI::line( $details['wp_version'] );
+			WP_CLI::line( $details['fp_version'] );
 			return;
 		}
 
@@ -935,11 +935,11 @@ EOT;
 		echo Utils\mustache_render(
 			self::get_template_path( 'versions.mustache' ),
 			[
-				'wp-version'    => $details['wp_version'],
-				'db-version'    => $details['wp_db_version'],
-				'local-package' => empty( $details['wp_local_package'] )
+				'fp-version'    => $details['fp_version'],
+				'db-version'    => $details['fp_db_version'],
+				'local-package' => empty( $details['fp_local_package'] )
 					? 'en_US'
-					: $details['wp_local_package'],
+					: $details['fp_local_package'],
 				'mce-version'   => $human_readable_tiny_mce
 					? "{$human_readable_tiny_mce} ({$details['tinymce_version']})"
 					: $details['tinymce_version'],
@@ -948,28 +948,28 @@ EOT;
 	}
 
 	/**
-	 * Gets version information from `wp-includes/version.php`.
+	 * Gets version information from `fp-includes/version.php`.
 	 *
 	 * @return array {
-	 *     @type string $wp_version The WordPress version.
-	 *     @type int $wp_db_version The WordPress DB revision.
+	 *     @type string $fp_version The WordPress version.
+	 *     @type int $fp_db_version The WordPress DB revision.
 	 *     @type string $tinymce_version The TinyMCE version.
-	 *     @type string $wp_local_package The TinyMCE version.
+	 *     @type string $fp_local_package The TinyMCE version.
 	 * }
 	 */
-	private static function get_wp_details( $abspath = ABSPATH ) {
-		$versions_path = $abspath . 'wp-includes/version.php';
+	private static function get_fp_details( $abspath = ABSPATH ) {
+		$versions_path = $abspath . 'fp-includes/version.php';
 
 		if ( ! is_readable( $versions_path ) ) {
 			WP_CLI::error(
 				"This does not seem to be a WordPress installation.\n" .
-				'Pass --path=`path/to/wordpress` or run `wp core download`.'
+				'Pass --path=`path/to/wordpress` or run `fp core download`.'
 			);
 		}
 
 		$version_content = (string) file_get_contents( $versions_path, false, null, 6, 2048 );
 
-		$vars   = [ 'wp_version', 'wp_db_version', 'tinymce_version', 'wp_local_package' ];
+		$vars   = [ 'fp_version', 'fp_db_version', 'tinymce_version', 'fp_local_package' ];
 		$result = [];
 
 		foreach ( $vars as $var_name ) {
@@ -1029,13 +1029,13 @@ EOT;
 	 * @return string|array String message on failure. An array of checksums on success.
 	 */
 	private static function get_core_checksums( $version, $locale, $insecure ) {
-		$wp_org_api = new WpOrgApi( [ 'insecure' => $insecure ] );
+		$fp_org_api = new WpOrgApi( [ 'insecure' => $insecure ] );
 
 		try {
 			/**
 			 * @var array|false $checksums
 			 */
-			$checksums = $wp_org_api->get_core_checksums( $version, $locale );
+			$checksums = $fp_org_api->get_core_checksums( $version, $locale );
 		} catch ( Exception $exception ) {
 			return $exception->getMessage();
 		}
@@ -1053,7 +1053,7 @@ EOT;
 	 * Defaults to updating WordPress to the latest version.
 	 *
 	 * If you see "Error: Another update is currently in progress.", you may
-	 * need to run `wp option delete core_updater.lock` after verifying another
+	 * need to run `fp option delete core_updater.lock` after verifying another
 	 * update isn't actually running.
 	 *
 	 * ## OPTIONS
@@ -1079,7 +1079,7 @@ EOT;
 	 * ## EXAMPLES
 	 *
 	 *     # Update WordPress
-	 *     $ wp core update
+	 *     $ fp core update
 	 *     Updating to version 4.5.2 (en_US)...
 	 *     Downloading update from https://downloads.wordpress.org/release/wordpress-4.5.2-no-content.zip...
 	 *     Unpacking the update...
@@ -1088,13 +1088,13 @@ EOT;
 	 *     Success: WordPress updated successfully.
 	 *
 	 *     # Update WordPress using zip file.
-	 *     $ wp core update ../latest.zip
+	 *     $ fp core update ../latest.zip
 	 *     Starting update...
 	 *     Unpacking the update...
 	 *     Success: WordPress updated successfully.
 	 *
 	 *     # Update WordPress to 3.1 forcefully
-	 *     $ wp core update --version=3.1 --force
+	 *     $ fp core update --version=3.1 --force
 	 *     Updating to version 3.1 (en_US)...
 	 *     Downloading update from https://wordpress.org/wordpress-3.1.zip...
 	 *     Unpacking the update...
@@ -1107,7 +1107,7 @@ EOT;
 	 * @param array{minor?: bool, version?: string, force?: bool, locale?: string, insecure?: bool} $assoc_args Associative arguments.
 	 */
 	public function update( $args, $assoc_args ) {
-		global $wp_version;
+		global $fp_version;
 
 		$update   = null;
 		$upgrader = 'WP_CLI\\Core\\CoreUpgrader';
@@ -1139,7 +1139,7 @@ EOT;
 		} elseif ( empty( $assoc_args['version'] ) ) {
 
 			// Update to next release
-			wp_version_check();
+			fp_version_check();
 
 			/**
 			 * @var object{updates: array<object{version: string, locale: string}>} $from_api
@@ -1148,7 +1148,7 @@ EOT;
 
 			if ( Utils\get_flag_value( $assoc_args, 'minor' ) ) {
 				foreach ( $from_api->updates as $offer ) {
-					$sem_ver = Utils\get_named_sem_ver( $offer->version, $wp_version );
+					$sem_ver = Utils\get_named_sem_ver( $offer->version, $fp_version );
 					if ( ! $sem_ver || 'patch' !== $sem_ver ) {
 						continue;
 					}
@@ -1162,7 +1162,7 @@ EOT;
 			} elseif ( ! empty( $from_api->updates ) ) {
 				list( $update ) = $from_api->updates;
 			}
-		} elseif ( Utils\wp_version_compare( $assoc_args['version'], '<' )
+		} elseif ( Utils\fp_version_compare( $assoc_args['version'], '<' )
 			|| 'nightly' === $assoc_args['version']
 			|| Utils\get_flag_value( $assoc_args, 'force' ) ) {
 
@@ -1193,10 +1193,10 @@ EOT;
 		}
 
 		if ( ! empty( $update )
-			&& ( $update->version !== $wp_version
+			&& ( $update->version !== $fp_version
 				|| Utils\get_flag_value( $assoc_args, 'force' ) ) ) {
 
-			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+			require_once ABSPATH . 'fp-admin/includes/upgrade.php';
 
 			if ( $update->version ) {
 				WP_CLI::log( "Updating to version {$update->version} ({$update->locale})..." );
@@ -1204,19 +1204,19 @@ EOT;
 				WP_CLI::log( 'Starting update...' );
 			}
 
-			$from_version = $wp_version;
+			$from_version = $fp_version;
 			$insecure     = (bool) Utils\get_flag_value( $assoc_args, 'insecure', false );
 
-			$GLOBALS['wpcli_core_update_obj'] = $update;
+			$GLOBALS['fpcli_core_update_obj'] = $update;
 
 			/**
-			 * @var \WP_CLI\Core\CoreUpgrader $wp_upgrader
+			 * @var \WP_CLI\Core\CoreUpgrader $fp_upgrader
 			 */
-			$wp_upgrader = Utils\get_upgrader( $upgrader, $insecure );
-			$result      = $wp_upgrader->upgrade( $update );
-			unset( $GLOBALS['wpcli_core_update_obj'] );
+			$fp_upgrader = Utils\get_upgrader( $upgrader, $insecure );
+			$result      = $fp_upgrader->upgrade( $update );
+			unset( $GLOBALS['fpcli_core_update_obj'] );
 
-			if ( is_wp_error( $result ) ) {
+			if ( is_fp_error( $result ) ) {
 				$message = WP_CLI::error_to_string( $result );
 				if ( 'up_to_date' !== $result->get_error_code() ) {
 					WP_CLI::error( $message );
@@ -1226,9 +1226,9 @@ EOT;
 			} else {
 
 				$to_version = '';
-				if ( file_exists( ABSPATH . 'wp-includes/version.php' ) ) {
-					$wp_details = self::get_wp_details();
-					$to_version = $wp_details['wp_version'];
+				if ( file_exists( ABSPATH . 'fp-includes/version.php' ) ) {
+					$fp_details = self::get_fp_details();
+					$to_version = $fp_details['fp_version'];
 				}
 
 				/**
@@ -1258,11 +1258,11 @@ EOT;
 	 * ## EXAMPLES
 	 *
 	 *     # Update the WordPress database.
-	 *     $ wp core update-db
+	 *     $ fp core update-db
 	 *     Success: WordPress database upgraded successfully from db version 36686 to 35700.
 	 *
 	 *     # Update databases for all sites on a network.
-	 *     $ wp core update-db --network
+	 *     $ fp core update-db --network
 	 *     WordPress database upgraded successfully from db version 35700 to 29630 on example.com/
 	 *     Success: WordPress database upgraded on 123/123 sites.
 	 *
@@ -1272,7 +1272,7 @@ EOT;
 	 * @param array{network?: bool, 'dry-run'?: bool} $assoc_args Associative arguments.
 	 */
 	public function update_db( $args, $assoc_args ) {
-		global $wpdb, $wp_db_version, $wp_current_db_version;
+		global $fpdb, $fp_db_version, $fp_current_db_version;
 
 		$network = Utils\get_flag_value( $assoc_args, 'network' );
 		if ( $network && ! is_multisite() ) {
@@ -1286,7 +1286,7 @@ EOT;
 
 		if ( $network ) {
 			$iterator_args = [
-				'table' => $wpdb->blogs,
+				'table' => $fpdb->blogs,
 				'where' => [
 					'spam'     => 0,
 					'deleted'  => 0,
@@ -1336,39 +1336,39 @@ EOT;
 			}
 			if ( ! $dry_run && $total && $success === $total ) {
 				foreach ( array_unique( $site_ids ) as $site_id ) {
-					update_metadata( 'site', $site_id, 'wpmu_upgrade_site', $wp_db_version );
+					update_metadata( 'site', $site_id, 'fpmu_upgrade_site', $fp_db_version );
 				}
 			}
 			WP_CLI::success( "WordPress database upgraded on {$success}/{$total} sites." );
 		} else {
-			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
+			require_once ABSPATH . 'fp-admin/includes/upgrade.php';
 
 			/**
-			 * @var string $wp_current_db_version
+			 * @var string $fp_current_db_version
 			 */
 			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Replacing WP Core behavior is the goal here.
-			$wp_current_db_version = __get_option( 'db_version' );
+			$fp_current_db_version = __get_option( 'db_version' );
 			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Replacing WP Core behavior is the goal here.
-			$wp_current_db_version = (int) $wp_current_db_version;
+			$fp_current_db_version = (int) $fp_current_db_version;
 
-			if ( $wp_db_version !== $wp_current_db_version ) {
+			if ( $fp_db_version !== $fp_current_db_version ) {
 				if ( $dry_run ) {
-					WP_CLI::success( "WordPress database will be upgraded from db version {$wp_current_db_version} to {$wp_db_version}." );
+					WP_CLI::success( "WordPress database will be upgraded from db version {$fp_current_db_version} to {$fp_db_version}." );
 				} else {
 					// WP upgrade isn't too fussy about generating MySQL warnings such as "Duplicate key name" during an upgrade so suppress.
-					$wpdb->suppress_errors();
+					$fpdb->suppress_errors();
 
-					// WP upgrade expects `$_SERVER['HTTP_HOST']` to be set in `wp_guess_url()`, otherwise get PHP notice.
+					// WP upgrade expects `$_SERVER['HTTP_HOST']` to be set in `fp_guess_url()`, otherwise get PHP notice.
 					if ( ! isset( $_SERVER['HTTP_HOST'] ) ) {
 						$_SERVER['HTTP_HOST'] = 'example.com';
 					}
 
-					wp_upgrade();
+					fp_upgrade();
 
-					WP_CLI::success( "WordPress database upgraded successfully from db version {$wp_current_db_version} to {$wp_db_version}." );
+					WP_CLI::success( "WordPress database upgraded successfully from db version {$fp_current_db_version} to {$fp_db_version}." );
 				}
 			} else {
-				WP_CLI::success( "WordPress database already at latest db version {$wp_db_version}." );
+				WP_CLI::success( "WordPress database already at latest db version {$fp_db_version}." );
 			}
 		}
 	}
@@ -1409,7 +1409,7 @@ EOT;
 	 */
 	private function get_updates( $assoc_args ) {
 		$force_check = Utils\get_flag_value( $assoc_args, 'force-check' );
-		wp_version_check( [], $force_check );
+		fp_version_check( [], $force_check );
 
 		/**
 		 * @var object{updates: array<object{version: string, locale: string, packages: object{partial?: string, full: string}}>}|false $from_api
@@ -1419,7 +1419,7 @@ EOT;
 			return [];
 		}
 
-		$compare_version = str_replace( '-src', '', $GLOBALS['wp_version'] );
+		$compare_version = str_replace( '-src', '', $GLOBALS['fp_version'] );
 
 		$updates = [
 			'major' => false,
@@ -1565,8 +1565,8 @@ EOT;
 			$count = 0;
 			foreach ( $files_to_remove as $file ) {
 
-				// wp-content should be considered user data
-				if ( 0 === stripos( $file, 'wp-content' ) ) {
+				// fp-content should be considered user data
+				if ( 0 === stripos( $file, 'fp-content' ) ) {
 					continue;
 				}
 
@@ -1586,7 +1586,7 @@ EOT;
 	}
 
 	private static function strip_content_dir( $zip_file ) {
-		$new_zip_file = Utils\get_temp_dir() . uniqid( 'wp_' ) . '.zip';
+		$new_zip_file = Utils\get_temp_dir() . uniqid( 'fp_' ) . '.zip';
 		register_shutdown_function(
 			function () use ( $new_zip_file ) {
 				if ( file_exists( $new_zip_file ) ) {
@@ -1608,22 +1608,22 @@ EOT;
 					continue;
 				}
 
-				// Strip all files in wp-content/themes and wp-content/plugins
+				// Strip all files in fp-content/themes and fp-content/plugins
 				// but leave the directories and index.php files intact.
 				if ( in_array(
 					$info['name'],
 					array(
-						'wordpress/wp-content/plugins/',
-						'wordpress/wp-content/plugins/index.php',
-						'wordpress/wp-content/themes/',
-						'wordpress/wp-content/themes/index.php',
+						'wordpress/fp-content/plugins/',
+						'wordpress/fp-content/plugins/index.php',
+						'wordpress/fp-content/themes/',
+						'wordpress/fp-content/themes/index.php',
 					),
 					true
 				) ) {
 					continue;
 				}
 
-				if ( 0 === stripos( $info['name'], 'wordpress/wp-content/themes/' ) || 0 === stripos( $info['name'], 'wordpress/wp-content/plugins/' ) ) {
+				if ( 0 === stripos( $info['name'], 'wordpress/fp-content/themes/' ) || 0 === stripos( $info['name'], 'wordpress/fp-content/plugins/' ) ) {
 					$zip->deleteIndex( $i );
 				}
 			}

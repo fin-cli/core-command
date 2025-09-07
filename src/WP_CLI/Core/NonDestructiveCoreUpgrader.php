@@ -5,7 +5,7 @@ namespace WP_CLI\Core;
 /**
  * A Core Upgrader class that leaves packages intact by default.
  *
- * @package wp-cli
+ * @package fp-cli
  */
 class NonDestructiveCoreUpgrader extends CoreUpgrader {
 	// phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found -- Provide default value.

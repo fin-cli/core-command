@@ -4,7 +4,7 @@ parameters:
     - src
     - core-command.php
   scanDirectories:
-    - vendor/wp-cli/wp-cli/php
+    - vendor/fp-cli/fp-cli/php
   scanFiles:
     - vendor/php-stubs/wordpress-stubs/wordpress-stubs.php
   treatPhpDocTypesAsCertain: false

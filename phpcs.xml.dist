@@ -46,7 +46,7 @@
 		<properties>
 			<property name="prefixes" type="array">
 				<element value="WP_CLI\Core"/><!-- Namespaces. -->
-				<element value="wpcli_core"/><!-- Global variables and such. -->
+				<element value="fpcli_core"/><!-- Global variables and such. -->
 			</property>
 		</properties>
 	</rule>

@@ -1,9 +1,9 @@
-wp-cli/core-command
+fp-cli/core-command
 ===================
 
 Downloads, installs, updates, and manages a WordPress installation.
 
-[![Testing](https://github.com/wp-cli/core-command/actions/workflows/testing.yml/badge.svg)](https://github.com/wp-cli/core-command/actions/workflows/testing.yml)
+[![Testing](https://github.com/fp-cli/core-command/actions/workflows/testing.yml/badge.svg)](https://github.com/fp-cli/core-command/actions/workflows/testing.yml)
 
 Quick links: [Using](#using) | [Installing](#installing) | [Contributing](#contributing) | [Support](#support)
 
@@ -11,38 +11,38 @@ Quick links: [Using](#using) | [Installing](#installing) | [Contributing](#contr
 
 This package implements the following commands:
 
-### wp core
+### fp core
 
 Downloads, installs, updates, and manages a WordPress installation.
 
 ~~~
-wp core
+fp core
 ~~~
 
 **EXAMPLES**
 
     # Download WordPress core
-    $ wp core download --locale=nl_NL
+    $ fp core download --locale=nl_NL
     Downloading WordPress 4.5.2 (nl_NL)...
     md5 hash verified: c5366d05b521831dd0b29dfc386e56a5
     Success: WordPress downloaded.
 
     # Install WordPress
-    $ wp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
+    $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
     Success: WordPress installed successfully.
 
     # Display the WordPress version
-    $ wp core version
+    $ fp core version
     4.5.2
 
 
 
-### wp core check-update
+### fp core check-update
 
 Checks for WordPress updates via Version Check API.
 
 ~~~
-wp core check-update [--minor] [--major] [--force-check] [--field=<field>] [--fields=<fields>] [--format=<format>]
+fp core check-update [--minor] [--major] [--force-check] [--field=<field>] [--fields=<fields>] [--format=<format>]
 ~~~
 
 Lists the most recent versions when there are updates available,
@@ -79,7 +79,7 @@ or success message when up to date.
 
 **EXAMPLES**
 
-    $ wp core check-update
+    $ fp core check-update
     +---------+-------------+-------------------------------------------------------------+
     | version | update_type | package_url                                                 |
     +---------+-------------+-------------------------------------------------------------+
@@ -88,12 +88,12 @@ or success message when up to date.
 
 
 
-### wp core download
+### fp core download
 
 Downloads core WordPress files.
 
 ~~~
-wp core download [<download-url>] [--path=<path>] [--locale=<locale>] [--version=<version>] [--skip-content] [--force] [--insecure] [--extract]
+fp core download [<download-url>] [--path=<path>] [--locale=<locale>] [--version=<version>] [--skip-content] [--force] [--insecure] [--extract]
 ~~~
 
 Downloads and extracts WordPress core files to the specified path. Uses
@@ -130,19 +130,19 @@ Subsequent uses of command will use the local cache if it still exists.
 
 **EXAMPLES**
 
-    $ wp core download --locale=nl_NL
+    $ fp core download --locale=nl_NL
     Downloading WordPress 4.5.2 (nl_NL)...
     md5 hash verified: c5366d05b521831dd0b29dfc386e56a5
     Success: WordPress downloaded.
 
 
 
-### wp core install
+### fp core install
 
 Runs the standard WordPress installation process.
 
 ~~~
-wp core install --url=<url> --title=<site-title> --admin_user=<username> [--admin_password=<password>] --admin_email=<email> [--locale=<locale>] [--skip-email]
+fp core install --url=<url> --title=<site-title> --admin_user=<username> [--admin_password=<password>] --admin_email=<email> [--locale=<locale>] [--skip-email]
 ~~~
 
 Creates the WordPress tables in the database using the URL, title, and
@@ -150,9 +150,9 @@ default admin user details provided. Performs the famous 5 minute install
 in seconds or less.
 
 Note: if you've installed WordPress in a subdirectory, then you'll need
-to `wp option update siteurl` after `wp core install`. For instance, if
-WordPress is installed in the `/wp` directory and your domain is example.com,
-then you'll need to run `wp option update siteurl http://example.com/wp` for
+to `fp option update siteurl` after `fp core install`. For instance, if
+WordPress is installed in the `/fp` directory and your domain is example.com,
+then you'll need to run `fp option update siteurl http://example.com/fp` for
 your WordPress installation to function properly.
 
 Note: When using custom user tables (e.g. `CUSTOM_USER_TABLE`), the admin
@@ -185,20 +185,20 @@ user_login doesn't exist, a new user will be created.
 **EXAMPLES**
 
     # Install WordPress in 5 seconds
-    $ wp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
+    $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
     Success: WordPress installed successfully.
 
     # Install WordPress without disclosing admin_password to bash history
-    $ wp core install --url=example.com --title=Example --admin_user=supervisor --admin_email=info@example.com --prompt=admin_password < admin_password.txt
+    $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_email=info@example.com --prompt=admin_password < admin_password.txt
 
 
 
-### wp core is-installed
+### fp core is-installed
 
 Checks if WordPress is installed.
 
 ~~~
-wp core is-installed [--network]
+fp core is-installed [--network]
 ~~~
 
 Determines whether WordPress is installed by checking if the standard
@@ -214,16 +214,16 @@ to communicate whether WordPress is installed.
 
     # Bash script for checking if WordPress is not installed.
 
-    if ! wp core is-installed 2>/dev/null; then
+    if ! fp core is-installed 2>/dev/null; then
         # WP is not installed. Let's try installing it.
-        wp core install
+        fp core install
     fi
 
     # Bash script for checking if WordPress is installed, with fallback.
 
-    if wp core is-installed 2>/dev/null; then
+    if fp core is-installed 2>/dev/null; then
         # WP is installed. Let's do some things we should only do in a confirmed WP environment.
-        wp core verify-checksums
+        fp core verify-checksums
     else
         # Fallback if WP is not installed.
         echo 'Hey Friend, you are in the wrong spot. Move in to your WordPress directory and try again.'
@@ -231,16 +231,16 @@ to communicate whether WordPress is installed.
 
 
 
-### wp core multisite-convert
+### fp core multisite-convert
 
 Transforms an existing single-site installation into a multisite installation.
 
 ~~~
-wp core multisite-convert [--title=<network-title>] [--base=<url-path>] [--subdomains] [--skip-config]
+fp core multisite-convert [--title=<network-title>] [--base=<url-path>] [--subdomains] [--skip-config]
 ~~~
 
 Creates the multisite database tables, and adds the multisite constants
-to wp-config.php.
+to fp-config.php.
 
 For those using WordPress with Apache, remember to update the `.htaccess`
 file with the appropriate multisite rewrite rules.
@@ -263,28 +263,28 @@ for more details about how multisite works.
 		If passed, the network will use subdomains, instead of subdirectories. Doesn't work with 'localhost'.
 
 	[--skip-config]
-		Don't add multisite constants to wp-config.php.
+		Don't add multisite constants to fp-config.php.
 
 **EXAMPLES**
 
-    $ wp core multisite-convert
+    $ fp core multisite-convert
     Set up multisite database tables.
-    Added multisite constants to wp-config.php.
+    Added multisite constants to fp-config.php.
     Success: Network installed. Don't forget to set up rewrite rules.
 
 
 
-### wp core multisite-install
+### fp core multisite-install
 
 Installs WordPress multisite from scratch.
 
 ~~~
-wp core multisite-install [--url=<url>] [--base=<url-path>] [--subdomains] --title=<site-title> --admin_user=<username> [--admin_password=<password>] --admin_email=<email> [--skip-email] [--skip-config]
+fp core multisite-install [--url=<url>] [--base=<url-path>] [--subdomains] --title=<site-title> --admin_user=<username> [--admin_password=<password>] --admin_email=<email> [--skip-email] [--skip-config]
 ~~~
 
 Creates the WordPress tables in the database using the URL, title, and
 default admin user details provided. Then, creates the multisite tables
-in the database and adds multisite constants to the wp-config.php.
+in the database and adds multisite constants to the fp-config.php.
 
 For those using WordPress with Apache, remember to update the `.htaccess`
 file with the appropriate multisite rewrite rules.
@@ -322,32 +322,32 @@ file with the appropriate multisite rewrite rules.
 		Don't send an email notification to the new admin user.
 
 	[--skip-config]
-		Don't add multisite constants to wp-config.php.
+		Don't add multisite constants to fp-config.php.
 
 **EXAMPLES**
 
-    $ wp core multisite-install --title="Welcome to the WordPress" \
+    $ fp core multisite-install --title="Welcome to the WordPress" \
     > --admin_user="admin" --admin_password="password" \
     > --admin_email="user@example.com"
     Single site database tables already present.
     Set up multisite database tables.
-    Added multisite constants to wp-config.php.
+    Added multisite constants to fp-config.php.
     Success: Network installed. Don't forget to set up rewrite rules.
 
 
 
-### wp core update
+### fp core update
 
 Updates WordPress to a newer version.
 
 ~~~
-wp core update [<zip>] [--minor] [--version=<version>] [--force] [--locale=<locale>] [--insecure]
+fp core update [<zip>] [--minor] [--version=<version>] [--force] [--locale=<locale>] [--insecure]
 ~~~
 
 Defaults to updating WordPress to the latest version.
 
 If you see "Error: Another update is currently in progress.", you may
-need to run `wp option delete core_updater.lock` after verifying another
+need to run `fp option delete core_updater.lock` after verifying another
 update isn't actually running.
 
 **OPTIONS**
@@ -373,7 +373,7 @@ update isn't actually running.
 **EXAMPLES**
 
     # Update WordPress
-    $ wp core update
+    $ fp core update
     Updating to version 4.5.2 (en_US)...
     Downloading update from https://downloads.wordpress.org/release/wordpress-4.5.2-no-content.zip...
     Unpacking the update...
@@ -382,13 +382,13 @@ update isn't actually running.
     Success: WordPress updated successfully.
 
     # Update WordPress using zip file.
-    $ wp core update ../latest.zip
+    $ fp core update ../latest.zip
     Starting update...
     Unpacking the update...
     Success: WordPress updated successfully.
 
     # Update WordPress to 3.1 forcefully
-    $ wp core update --version=3.1 --force
+    $ fp core update --version=3.1 --force
     Updating to version 3.1 (en_US)...
     Downloading update from https://wordpress.org/wordpress-3.1.zip...
     Unpacking the update...
@@ -397,12 +397,12 @@ update isn't actually running.
 
 
 
-### wp core update-db
+### fp core update-db
 
 Runs the WordPress database update procedure.
 
 ~~~
-wp core update-db [--network] [--dry-run]
+fp core update-db [--network] [--dry-run]
 ~~~
 
 **OPTIONS**
@@ -416,22 +416,22 @@ wp core update-db [--network] [--dry-run]
 **EXAMPLES**
 
     # Update the WordPress database.
-    $ wp core update-db
+    $ fp core update-db
     Success: WordPress database upgraded successfully from db version 36686 to 35700.
 
     # Update databases for all sites on a network.
-    $ wp core update-db --network
+    $ fp core update-db --network
     WordPress database upgraded successfully from db version 35700 to 29630 on example.com/
     Success: WordPress database upgraded on 123/123 sites.
 
 
 
-### wp core version
+### fp core version
 
 Displays the WordPress version.
 
 ~~~
-wp core version [--extra]
+fp core version [--extra]
 ~~~
 
 **OPTIONS**
@@ -442,11 +442,11 @@ wp core version [--extra]
 **EXAMPLES**
 
     # Display the WordPress version
-    $ wp core version
+    $ fp core version
     4.5.2
 
     # Display WordPress version along with other information
-    $ wp core version --extra
+    $ fp core version --extra
     WordPress version: 4.5.2
     Database revision: 36686
     TinyMCE version:   4.310 (4310-20160418)
@@ -458,7 +458,7 @@ This package is included with WP-CLI itself, no additional installation necessar
 
 To install the latest version of this package over what's included in WP-CLI, run:
 
-    wp package install git@github.com:wp-cli/core-command.git
+    fp package install git@github.com:fp-cli/core-command.git
 
 ## Contributing
 
@@ -472,19 +472,19 @@ For a more thorough introduction, [check out WP-CLI's guide to contributing](htt
 
 Think you’ve found a bug? We’d love for you to help us get it fixed.
 
-Before you create a new issue, you should [search existing issues](https://github.com/wp-cli/core-command/issues?q=label%3Abug%20) to see if there’s an existing resolution to it, or if it’s already been fixed in a newer version.
+Before you create a new issue, you should [search existing issues](https://github.com/fp-cli/core-command/issues?q=label%3Abug%20) to see if there’s an existing resolution to it, or if it’s already been fixed in a newer version.
 
-Once you’ve done a bit of searching and discovered there isn’t an open or fixed issue for your bug, please [create a new issue](https://github.com/wp-cli/core-command/issues/new). Include as much detail as you can, and clear steps to reproduce if possible. For more guidance, [review our bug report documentation](https://make.wordpress.org/cli/handbook/bug-reports/).
+Once you’ve done a bit of searching and discovered there isn’t an open or fixed issue for your bug, please [create a new issue](https://github.com/fp-cli/core-command/issues/new). Include as much detail as you can, and clear steps to reproduce if possible. For more guidance, [review our bug report documentation](https://make.wordpress.org/cli/handbook/bug-reports/).
 
 ### Creating a pull request
 
-Want to contribute a new feature? Please first [open a new issue](https://github.com/wp-cli/core-command/issues/new) to discuss whether the feature is a good fit for the project.
+Want to contribute a new feature? Please first [open a new issue](https://github.com/fp-cli/core-command/issues/new) to discuss whether the feature is a good fit for the project.
 
 Once you've decided to commit the time to seeing your pull request through, [please follow our guidelines for creating a pull request](https://make.wordpress.org/cli/handbook/pull-requests/) to make sure it's a pleasant experience. See "[Setting up](https://make.wordpress.org/cli/handbook/pull-requests/#setting-up)" for details specific to working on this package locally.
 
 ## Support
 
-GitHub issues aren't for general support questions, but there are other venues you can try: https://wp-cli.org/#support
+GitHub issues aren't for general support questions, but there are other venues you can try: https://fp-cli.org/#support
 
 
-*This README.md is generated dynamically from the project's codebase using `wp scaffold package-readme` ([doc](https://github.com/wp-cli/scaffold-package-command#wp-scaffold-package-readme)). To suggest changes, please submit a pull request against the corresponding part of the codebase.*
+*This README.md is generated dynamically from the project's codebase using `fp scaffold package-readme` ([doc](https://github.com/fp-cli/scaffold-package-command#fp-scaffold-package-readme)). To suggest changes, please submit a pull request against the corresponding part of the codebase.*
