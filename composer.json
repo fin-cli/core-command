@@ -27,7 +27,7 @@
         "sort-packages": true,
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "johnpbloch/finpress-core-installer": true,
+            "dieselfox1/finpress-core-installer": true,
             "phpstan/extension-installer": true
         },
         "lock": false
