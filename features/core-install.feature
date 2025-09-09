@@ -1,12 +1,12 @@
-Feature: Install WordPress core
+Feature: Install FinPress core
 
   # TODO: Requires investigation for SQLite support.
   # See https://github.com/fp-cli/core-command/issues/244
   @require-mysql
-  Scenario: Two WordPress installs sharing the same user table won't update existing user
+  Scenario: Two FinPress installs sharing the same user table won't update existing user
     Given an empty directory
-    And WP files
-    And a WP install in 'second'
+    And FP files
+    And a FP install in 'second'
     And a extra-config file:
       """
       define( 'CUSTOM_USER_TABLE', 'secondusers' );
@@ -48,7 +48,7 @@ Feature: Install WordPress core
     When I run `fp core install --url=example.org --title=Test --admin_user=testadmin --admin_email=testadmin@example.com --admin_password=nefpassword`
     Then STDOUT should contain:
       """
-      Success: WordPress installed successfully.
+      Success: FinPress installed successfully.
       """
 
     When I run `fp user list --field=user_login`
@@ -87,10 +87,10 @@ Feature: Install WordPress core
   # TODO: Requires investigation for SQLite support.
   # See https://github.com/fp-cli/core-command/issues/244
   @require-mysql
-  Scenario: Two WordPress installs sharing the same user table will create new user
+  Scenario: Two FinPress installs sharing the same user table will create new user
     Given an empty directory
-    And WP files
-    And a WP install in 'second'
+    And FP files
+    And a FP install in 'second'
     And a extra-config file:
       """
       define( 'CUSTOM_USER_TABLE', 'secondusers' );
@@ -122,7 +122,7 @@ Feature: Install WordPress core
     When I run `fp core install --url=example.org --title=Test --admin_user=testadmin --admin_email=testadmin@example.com --admin_password=nefpassword`
     Then STDOUT should contain:
       """
-      Success: WordPress installed successfully.
+      Success: FinPress installed successfully.
       """
 
     When I run `fp user list --field=user_login`
@@ -159,13 +159,13 @@ Feature: Install WordPress core
       fp_users
       """
 
-  Scenario: Install WordPress without specifying the admin password
+  Scenario: Install FinPress without specifying the admin password
     Given an empty directory
-    And WP files
+    And FP files
     And fp-config.php
     And a database
 
-    # Old versions of WP can generate fpdb database errors if the WP tables don't exist, so STDERR may or may not be empty
+    # Old versions of FP can generate fpdb database errors if the FP tables don't exist, so STDERR may or may not be empty
     When I try `fp core install --url=localhost:8001 --title=Test --admin_user=fpcli --admin_email=fpcli@example.org`
     Then STDOUT should contain:
       """
@@ -173,25 +173,25 @@ Feature: Install WordPress core
       """
     And STDOUT should contain:
       """
-      Success: WordPress installed successfully.
+      Success: FinPress installed successfully.
       """
     And the return code should be 0
 
   @less-than-php-7
-  Scenario: Install WordPress with locale set to de_DE on WP < 4.0
+  Scenario: Install FinPress with locale set to de_DE on FP < 4.0
     Given an empty directory
     And an empty cache
     And a database
 
     When I run `fp core download --version=3.7 --locale=de_DE`
-    And save STDOUT 'Downloading WordPress ([\d\.]+)' as {VERSION}
+    And save STDOUT 'Downloading FinPress ([\d\.]+)' as {VERSION}
     And I run `echo {VERSION}`
     Then STDOUT should contain:
       """
       3.7
       """
     And the fp-settings.php file should exist
-    And the {SUITE_CACHE_DIR}/core/wordpress-{VERSION}-de_DE.tar.gz file should exist
+    And the {SUITE_CACHE_DIR}/core/finpress-{VERSION}-de_DE.tar.gz file should exist
 
     When I run `fp config create --dbname={DB_NAME} --dbuser={DB_USER} --dbpass={DB_PASSWORD} --dbhost={DB_HOST} --locale=de_DE --skip-check`
     Then STDOUT should be:
@@ -199,15 +199,15 @@ Feature: Install WordPress core
       Success: Generated 'fp-config.php' file.
       """
 
-    # Old versions of WP can generate fpdb database errors if the WP tables don't exist, so STDERR may or may not be empty
+    # Old versions of FP can generate fpdb database errors if the FP tables don't exist, so STDERR may or may not be empty
     When I try `fp core install --url=example.org --title=Test --admin_user=testadmin --admin_email=testadmin@example.com --admin_password=nefpassword --locale=de_DE --skip-email`
     Then STDERR should contain:
       """
-      Warning: The flag --locale=de_DE is being ignored as it requires WordPress 4.0+.
+      Warning: The flag --locale=de_DE is being ignored as it requires FinPress 4.0+.
       """
     And STDOUT should contain:
       """
-      Success: WordPress installed successfully.
+      Success: FinPress installed successfully.
       """
 
     When I run `fp core version`
@@ -222,22 +222,22 @@ Feature: Install WordPress core
       Kategorien
       """
 
-  # This test downgrades to an older WordPress version, but the SQLite plugin requires 6.0+
+  # This test downgrades to an older FinPress version, but the SQLite plugin requires 6.0+
   @require-mysql
-  Scenario: Install WordPress with locale set to de_DE on WP >= 4.0
+  Scenario: Install FinPress with locale set to de_DE on FP >= 4.0
     Given an empty directory
     And an empty cache
     And a database
 
     When I run `fp core download --version=5.6 --locale=de_DE`
-    And save STDOUT 'Downloading WordPress ([\d\.]+)' as {VERSION}
+    And save STDOUT 'Downloading FinPress ([\d\.]+)' as {VERSION}
     And I run `echo {VERSION}`
     Then STDOUT should contain:
       """
       5.6
       """
     And the fp-settings.php file should exist
-    And the {SUITE_CACHE_DIR}/core/wordpress-{VERSION}-de_DE.tar.gz file should exist
+    And the {SUITE_CACHE_DIR}/core/finpress-{VERSION}-de_DE.tar.gz file should exist
 
     When I run `fp config create --dbname={DB_NAME} --dbuser={DB_USER} --dbpass={DB_PASSWORD} --dbhost={DB_HOST} --locale=de_DE --skip-check`
     Then STDOUT should be:
@@ -245,11 +245,11 @@ Feature: Install WordPress core
       Success: Generated 'fp-config.php' file.
       """
 
-    # Old versions of WP can generate fpdb database errors if the WP tables don't exist, so STDERR may or may not be empty
+    # Old versions of FP can generate fpdb database errors if the FP tables don't exist, so STDERR may or may not be empty
     When I run `fp core install --url=example.org --title=Test --admin_user=testadmin --admin_email=testadmin@example.com --admin_password=nefpassword --locale=de_DE --skip-email`
     Then STDOUT should contain:
       """
-      Success: WordPress installed successfully.
+      Success: FinPress installed successfully.
       """
 
     When I run `fp core version`
@@ -264,13 +264,13 @@ Feature: Install WordPress core
       Kategorien
       """
 
-  Scenario: Install WordPress multisite without specifying the password
+  Scenario: Install FinPress multisite without specifying the password
     Given an empty directory
-    And WP files
+    And FP files
     And fp-config.php
     And a database
 
-    # Old versions of WP can generate fpdb database errors if the WP tables don't exist, so STDERR may or may not be empty
+    # Old versions of FP can generate fpdb database errors if the FP tables don't exist, so STDERR may or may not be empty
     When I try `fp core multisite-install --url=foobar.org --title=Test --admin_user=fpcli --admin_email=admin@example.com`
     Then STDOUT should contain:
       """
@@ -282,9 +282,9 @@ Feature: Install WordPress core
       """
     And the return code should be 0
 
-  Scenario: Install WordPress multisite without adding multisite constants to fp-config file
+  Scenario: Install FinPress multisite without adding multisite constants to fp-config file
     Given an empty directory
-    And WP files
+    And FP files
     And fp-config.php
     And a database
 
@@ -295,13 +295,13 @@ Feature: Install WordPress core
       """
 
   @require-mysql
-  Scenario: Install WordPress multisite with existing multisite constants in fp-config file
+  Scenario: Install FinPress multisite with existing multisite constants in fp-config file
     Given an empty directory
-    And WP files
+    And FP files
     And a database
     And a extra-config file:
       """
-      define( 'WP_ALLOW_MULTISITE', true );
+      define( 'FP_ALLOW_MULTISITE', true );
       define( 'MULTISITE', true );
       define( 'SUBDOMAIN_INSTALL', true );
       $base = '/';

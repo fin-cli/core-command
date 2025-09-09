@@ -1,37 +1,37 @@
 <?php
 
 use Composer\Semver\Comparator;
-use WP_CLI\Extractor;
-use WP_CLI\Iterators\Table as TableIterator;
-use WP_CLI\Utils;
-use WP_CLI\Formatter;
-use WP_CLI\WpOrgApi;
+use FP_CLI\Extractor;
+use FP_CLI\Iterators\Table as TableIterator;
+use FP_CLI\Utils;
+use FP_CLI\Formatter;
+use FP_CLI\FpOrgApi;
 
 /**
- * Downloads, installs, updates, and manages a WordPress installation.
+ * Downloads, installs, updates, and manages a FinPress installation.
  *
  * ## EXAMPLES
  *
- *     # Download WordPress core
+ *     # Download FinPress core
  *     $ fp core download --locale=nl_NL
- *     Downloading WordPress 4.5.2 (nl_NL)...
+ *     Downloading FinPress 4.5.2 (nl_NL)...
  *     md5 hash verified: c5366d05b521831dd0b29dfc386e56a5
- *     Success: WordPress downloaded.
+ *     Success: FinPress downloaded.
  *
- *     # Install WordPress
+ *     # Install FinPress
  *     $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
- *     Success: WordPress installed successfully.
+ *     Success: FinPress installed successfully.
  *
- *     # Display the WordPress version
+ *     # Display the FinPress version
  *     $ fp core version
  *     4.5.2
  *
  * @package fp-cli
  */
-class Core_Command extends WP_CLI_Command {
+class Core_Command extends FP_CLI_Command {
 
 	/**
-	 * Checks for WordPress updates via Version Check API.
+	 * Checks for FinPress updates via Version Check API.
 	 *
 	 * Lists the most recent versions when there are updates available,
 	 * or success message when up to date.
@@ -71,7 +71,7 @@ class Core_Command extends WP_CLI_Command {
 	 *     +---------+-------------+-------------------------------------------------------------+
 	 *     | version | update_type | package_url                                                 |
 	 *     +---------+-------------+-------------------------------------------------------------+
-	 *     | 4.5.2   | major       | https://downloads.wordpress.org/release/wordpress-4.5.2.zip |
+	 *     | 4.5.2   | major       | https://downloads.finpress.org/release/finpress-4.5.2.zip |
 	 *     +---------+-------------+-------------------------------------------------------------+
 	 *
 	 * @subcommand check-update
@@ -92,14 +92,14 @@ class Core_Command extends WP_CLI_Command {
 			);
 			$formatter->display_items( $updates );
 		} else {
-			WP_CLI::success( 'WordPress is at the latest version.' );
+			FP_CLI::success( 'FinPress is at the latest version.' );
 		}
 	}
 
 	/**
-	 * Downloads core WordPress files.
+	 * Downloads core FinPress files.
 	 *
-	 * Downloads and extracts WordPress core files to the specified path. Uses
+	 * Downloads and extracts FinPress core files to the specified path. Uses
 	 * current directory when no path is specified. Downloaded build is verified
 	 * to have the correct md5 and then cached to the local filesystem.
 	 * Subsequent uses of command will use the local cache if it still exists.
@@ -107,10 +107,10 @@ class Core_Command extends WP_CLI_Command {
 	 * ## OPTIONS
 	 *
 	 * [<download-url>]
-	 * : Download directly from a provided URL instead of fetching the URL from the wordpress.org servers.
+	 * : Download directly from a provided URL instead of fetching the URL from the finpress.org servers.
 	 *
 	 * [--path=<path>]
-	 * : Specify the path in which to install WordPress. Defaults to current
+	 * : Specify the path in which to install FinPress. Defaults to current
 	 * directory.
 	 *
 	 * [--locale=<locale>]
@@ -120,7 +120,7 @@ class Core_Command extends WP_CLI_Command {
 	 * : Select which version you want to download. Accepts a version number, 'latest' or 'nightly'.
 	 *
 	 * [--skip-content]
-	 * : Download WP without the default themes and plugins.
+	 * : Download FP without the default themes and plugins.
 	 *
 	 * [--force]
 	 * : Overwrites existing files, if present.
@@ -134,9 +134,9 @@ class Core_Command extends WP_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     $ fp core download --locale=nl_NL
-	 *     Downloading WordPress 4.5.2 (nl_NL)...
+	 *     Downloading FinPress 4.5.2 (nl_NL)...
 	 *     md5 hash verified: c5366d05b521831dd0b29dfc386e56a5
-	 *     Success: WordPress downloaded.
+	 *     Success: FinPress downloaded.
 	 *
 	 * @when before_fp_load
 	 *
@@ -151,34 +151,34 @@ class Core_Command extends WP_CLI_Command {
 			? ( rtrim( $assoc_args['path'], '/\\' ) . '/' )
 			: ABSPATH;
 
-		// Check for files if WordPress already present or not.
-		$wordpress_present = is_readable( $download_dir . 'fp-load.php' )
+		// Check for files if FinPress already present or not.
+		$finpress_present = is_readable( $download_dir . 'fp-load.php' )
 			|| is_readable( $download_dir . 'fp-mail.php' )
 			|| is_readable( $download_dir . 'fp-cron.php' )
 			|| is_readable( $download_dir . 'fp-links-opml.php' );
 
-		if ( $wordpress_present && ! Utils\get_flag_value( $assoc_args, 'force' ) ) {
-			WP_CLI::error( 'WordPress files seem to already be present here.' );
+		if ( $finpress_present && ! Utils\get_flag_value( $assoc_args, 'force' ) ) {
+			FP_CLI::error( 'FinPress files seem to already be present here.' );
 		}
 
 		if ( ! is_dir( $download_dir ) ) {
 			if ( ! is_writable( dirname( $download_dir ) ) ) {
-				WP_CLI::error( "Insufficient permission to create directory '{$download_dir}'." );
+				FP_CLI::error( "Insufficient permission to create directory '{$download_dir}'." );
 			}
 
-			WP_CLI::log( "Creating directory '{$download_dir}'." );
+			FP_CLI::log( "Creating directory '{$download_dir}'." );
 			if ( ! @mkdir( $download_dir, 0777, true /*recursive*/ ) ) {
 				$error = error_get_last();
 				if ( $error ) {
-					WP_CLI::error( "Failed to create directory '{$download_dir}': {$error['message']}." );
+					FP_CLI::error( "Failed to create directory '{$download_dir}': {$error['message']}." );
 				} else {
-					WP_CLI::error( "Failed to create directory '{$download_dir}'." );
+					FP_CLI::error( "Failed to create directory '{$download_dir}'." );
 				}
 			}
 		}
 
 		if ( ! is_writable( $download_dir ) ) {
-			WP_CLI::error( "'{$download_dir}' is not writable by current user." );
+			FP_CLI::error( "'{$download_dir}' is not writable by current user." );
 		}
 
 		$locale       = Utils\get_flag_value( $assoc_args, 'locale', 'en_US' );
@@ -187,7 +187,7 @@ class Core_Command extends WP_CLI_Command {
 		$extract      = Utils\get_flag_value( $assoc_args, 'extract', true );
 
 		if ( $skip_content && ! $extract ) {
-			WP_CLI::error( 'Cannot use both --skip-content and --no-extract at the same time.' );
+			FP_CLI::error( 'Cannot use both --skip-content and --no-extract at the same time.' );
 		}
 
 		$download_url = array_shift( $args );
@@ -196,10 +196,10 @@ class Core_Command extends WP_CLI_Command {
 		if ( $from_url ) {
 			$version = null;
 			if ( isset( $assoc_args['version'] ) ) {
-				WP_CLI::error( 'Version option is not available for URL downloads.' );
+				FP_CLI::error( 'Version option is not available for URL downloads.' );
 			}
 			if ( $skip_content || 'en_US' !== $locale ) {
-				WP_CLI::error( 'Skip content and locale options are not available for URL downloads.' );
+				FP_CLI::error( 'Skip content and locale options are not available for URL downloads.' );
 			}
 		} elseif ( isset( $assoc_args['version'] ) && 'latest' !== $assoc_args['version'] ) {
 			$version = $assoc_args['version'];
@@ -215,13 +215,13 @@ class Core_Command extends WP_CLI_Command {
 			$download_url = $this->get_download_url( $version, $locale, $extension );
 		} else {
 			try {
-				$offer = ( new WpOrgApi( [ 'insecure' => $insecure ] ) )
+				$offer = ( new FpOrgApi( [ 'insecure' => $insecure ] ) )
 					->get_core_download_offer( $locale );
 			} catch ( Exception $exception ) {
-				WP_CLI::error( $exception );
+				FP_CLI::error( $exception );
 			}
 			if ( ! $offer ) {
-				WP_CLI::error( "The requested locale ({$locale}) was not found." );
+				FP_CLI::error( "The requested locale ({$locale}) was not found." );
 			}
 			$version      = $offer['current'];
 			$download_url = $offer['download'];
@@ -231,7 +231,7 @@ class Core_Command extends WP_CLI_Command {
 		}
 
 		if ( 'nightly' === $version && 'en_US' !== $locale ) {
-			WP_CLI::error( 'Nightly builds are only available for the en_US locale.' );
+			FP_CLI::error( 'Nightly builds are only available for the en_US locale.' );
 		}
 
 		$from_version = '';
@@ -241,9 +241,9 @@ class Core_Command extends WP_CLI_Command {
 		}
 
 		if ( $from_url ) {
-			WP_CLI::log( "Downloading from {$download_url} ..." );
+			FP_CLI::log( "Downloading from {$download_url} ..." );
 		} else {
-			WP_CLI::log( "Downloading WordPress {$version} ({$locale})..." );
+			FP_CLI::log( "Downloading FinPress {$version} ({$locale})..." );
 		}
 
 		$path_parts = pathinfo( $download_url );
@@ -251,32 +251,32 @@ class Core_Command extends WP_CLI_Command {
 		if ( isset( $path_parts['extension'] ) && 'zip' === $path_parts['extension'] ) {
 			$extension = 'zip';
 			if ( $extract && ! class_exists( 'ZipArchive' ) ) {
-				WP_CLI::error( 'Extracting a zip file requires ZipArchive.' );
+				FP_CLI::error( 'Extracting a zip file requires ZipArchive.' );
 			}
 		}
 
 		if ( $skip_content && 'zip' !== $extension ) {
-			WP_CLI::error( 'Skip content is only available for ZIP files.' );
+			FP_CLI::error( 'Skip content is only available for ZIP files.' );
 		}
 
-		$cache = WP_CLI::get_cache();
+		$cache = FP_CLI::get_cache();
 		if ( $from_url ) {
 			$cache_file = null;
 		} else {
-			$cache_key  = "core/wordpress-{$version}-{$locale}.{$extension}";
+			$cache_key  = "core/finpress-{$version}-{$locale}.{$extension}";
 			$cache_file = $cache->has( $cache_key );
 		}
 
 		$bad_cache = false;
 
 		if ( is_string( $cache_file ) ) {
-			WP_CLI::log( "Using cached file '{$cache_file}'..." );
+			FP_CLI::log( "Using cached file '{$cache_file}'..." );
 			$skip_content_cache_file = $skip_content ? self::strip_content_dir( $cache_file ) : null;
 			if ( $extract ) {
 				try {
 					Extractor::extract( $skip_content_cache_file ?: $cache_file, $download_dir );
 				} catch ( Exception $exception ) {
-					WP_CLI::warning( 'Extraction failed, downloading a new copy...' );
+					FP_CLI::warning( 'Extraction failed, downloading a new copy...' );
 					$bad_cache = true;
 				}
 			} else {
@@ -303,32 +303,32 @@ class Core_Command extends WP_CLI_Command {
 				'insecure' => $insecure,
 			];
 
-			/** @var \WpOrg\Requests\Response $response */
+			/** @var \FpOrg\Requests\Response $response */
 			$response = Utils\http_request( 'GET', $download_url, null, $headers, $options );
 
 			if ( 404 === (int) $response->status_code ) {
-				WP_CLI::error( 'Release not found. Double-check locale or version.' );
+				FP_CLI::error( 'Release not found. Double-check locale or version.' );
 			} elseif ( 20 !== (int) substr( (string) $response->status_code, 0, 2 ) ) {
-				WP_CLI::error( "Couldn't access download URL (HTTP code {$response->status_code})." );
+				FP_CLI::error( "Couldn't access download URL (HTTP code {$response->status_code})." );
 			}
 
 			if ( 'nightly' !== $version ) {
 				unset( $options['filename'] );
-				/** @var \WpOrg\Requests\Response $md5_response */
+				/** @var \FpOrg\Requests\Response $md5_response */
 				$md5_response = Utils\http_request( 'GET', $download_url . '.md5', null, [], $options );
 				if ( $md5_response->status_code >= 200 && $md5_response->status_code < 300 ) {
 					$md5_file = md5_file( $temp );
 
 					if ( $md5_file === $md5_response->body ) {
-						WP_CLI::log( 'md5 hash verified: ' . $md5_file );
+						FP_CLI::log( 'md5 hash verified: ' . $md5_file );
 					} else {
-						WP_CLI::error( "md5 hash for download ({$md5_file}) is different than the release hash ({$md5_response->body})." );
+						FP_CLI::error( "md5 hash for download ({$md5_file}) is different than the release hash ({$md5_response->body})." );
 					}
 				} else {
-					WP_CLI::warning( "Couldn't access md5 hash for release ({$download_url}.md5, HTTP code {$md5_response->status_code})." );
+					FP_CLI::warning( "Couldn't access md5 hash for release ({$download_url}.md5, HTTP code {$md5_response->status_code})." );
 				}
 			} else {
-				WP_CLI::warning( 'md5 hash checks are not available for nightly downloads.' );
+				FP_CLI::warning( 'md5 hash checks are not available for nightly downloads.' );
 			}
 
 			$skip_content_temp = $skip_content ? self::strip_content_dir( $temp ) : null;
@@ -336,7 +336,7 @@ class Core_Command extends WP_CLI_Command {
 				try {
 					Extractor::extract( $skip_content_temp ?: $temp, $download_dir );
 				} catch ( Exception $exception ) {
-					WP_CLI::error( "Couldn't extract WordPress archive. {$exception->getMessage()}" );
+					FP_CLI::error( "Couldn't extract FinPress archive. {$exception->getMessage()}" );
 				}
 			} else {
 				copy( $temp, $download_dir . basename( $temp ) );
@@ -349,19 +349,19 @@ class Core_Command extends WP_CLI_Command {
 			}
 		}
 
-		if ( $wordpress_present ) {
+		if ( $finpress_present ) {
 			$this->cleanup_extra_files( $from_version, $version, $locale, $insecure );
 		}
 
-		WP_CLI::success( 'WordPress downloaded.' );
+		FP_CLI::success( 'FinPress downloaded.' );
 	}
 
 	/**
-	 * Checks if WordPress is installed.
+	 * Checks if FinPress is installed.
 	 *
-	 * Determines whether WordPress is installed by checking if the standard
+	 * Determines whether FinPress is installed by checking if the standard
 	 * database tables are installed. Doesn't produce output; uses exit codes
-	 * to communicate whether WordPress is installed.
+	 * to communicate whether FinPress is installed.
 	 *
 	 * ## OPTIONS
 	 *
@@ -370,21 +370,21 @@ class Core_Command extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     # Bash script for checking if WordPress is not installed.
+	 *     # Bash script for checking if FinPress is not installed.
 	 *
 	 *     if ! fp core is-installed 2>/dev/null; then
-	 *         # WP is not installed. Let's try installing it.
+	 *         # FP is not installed. Let's try installing it.
 	 *         fp core install
 	 *     fi
 	 *
-	 *     # Bash script for checking if WordPress is installed, with fallback.
+	 *     # Bash script for checking if FinPress is installed, with fallback.
 	 *
 	 *     if fp core is-installed 2>/dev/null; then
-	 *         # WP is installed. Let's do some things we should only do in a confirmed WP environment.
+	 *         # FP is installed. Let's do some things we should only do in a confirmed FP environment.
 	 *         fp core verify-checksums
 	 *     else
-	 *         # Fallback if WP is not installed.
-	 *         echo 'Hey Friend, you are in the wrong spot. Move in to your WordPress directory and try again.'
+	 *         # Fallback if FP is not installed.
+	 *         echo 'Hey Friend, you are in the wrong spot. Move in to your FinPress directory and try again.'
 	 *     fi
 	 *
 	 * @subcommand is-installed
@@ -394,24 +394,24 @@ class Core_Command extends WP_CLI_Command {
 	 */
 	public function is_installed( $args, $assoc_args ) {
 		if ( is_blog_installed() && ( ! Utils\get_flag_value( $assoc_args, 'network' ) || is_multisite() ) ) {
-			WP_CLI::halt( 0 );
+			FP_CLI::halt( 0 );
 		}
 
-		WP_CLI::halt( 1 );
+		FP_CLI::halt( 1 );
 	}
 
 	/**
-	 * Runs the standard WordPress installation process.
+	 * Runs the standard FinPress installation process.
 	 *
-	 * Creates the WordPress tables in the database using the URL, title, and
+	 * Creates the FinPress tables in the database using the URL, title, and
 	 * default admin user details provided. Performs the famous 5 minute install
 	 * in seconds or less.
 	 *
-	 * Note: if you've installed WordPress in a subdirectory, then you'll need
+	 * Note: if you've installed FinPress in a subdirectory, then you'll need
 	 * to `fp option update siteurl` after `fp core install`. For instance, if
-	 * WordPress is installed in the `/fp` directory and your domain is example.com,
+	 * FinPress is installed in the `/fp` directory and your domain is example.com,
 	 * then you'll need to run `fp option update siteurl http://example.com/fp` for
-	 * your WordPress installation to function properly.
+	 * your FinPress installation to function properly.
 	 *
 	 * Note: When using custom user tables (e.g. `CUSTOM_USER_TABLE`), the admin
 	 * email and password are ignored if the user_login already exists. If the
@@ -442,11 +442,11 @@ class Core_Command extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     # Install WordPress in 5 seconds
+	 *     # Install FinPress in 5 seconds
 	 *     $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
-	 *     Success: WordPress installed successfully.
+	 *     Success: FinPress installed successfully.
 	 *
-	 *     # Install WordPress without disclosing admin_password to bash history
+	 *     # Install FinPress without disclosing admin_password to bash history
 	 *     $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_email=info@example.com --prompt=admin_password < admin_password.txt
 	 *
 	 * @param string[] $args Positional arguments. Unused.
@@ -454,9 +454,9 @@ class Core_Command extends WP_CLI_Command {
 	 */
 	public function install( $args, $assoc_args ) {
 		if ( $this->do_install( $assoc_args ) ) {
-			WP_CLI::success( 'WordPress installed successfully.' );
+			FP_CLI::success( 'FinPress installed successfully.' );
 		} else {
-			WP_CLI::log( 'WordPress is already installed.' );
+			FP_CLI::log( 'FinPress is already installed.' );
 		}
 	}
 
@@ -466,10 +466,10 @@ class Core_Command extends WP_CLI_Command {
 	 * Creates the multisite database tables, and adds the multisite constants
 	 * to fp-config.php.
 	 *
-	 * For those using WordPress with Apache, remember to update the `.htaccess`
+	 * For those using FinPress with Apache, remember to update the `.htaccess`
 	 * file with the appropriate multisite rewrite rules.
 	 *
-	 * [Review the multisite documentation](https://wordpress.org/support/article/create-a-network/)
+	 * [Review the multisite documentation](https://finpress.org/support/article/create-a-network/)
 	 * for more details about how multisite works.
 	 *
 	 * ## OPTIONS
@@ -504,7 +504,7 @@ class Core_Command extends WP_CLI_Command {
 	 */
 	public function multisite_convert( $args, $assoc_args ) {
 		if ( is_multisite() ) {
-			WP_CLI::error( 'This already is a multisite installation.' );
+			FP_CLI::error( 'This already is a multisite installation.' );
 		}
 
 		$assoc_args = self::set_multisite_defaults( $assoc_args );
@@ -519,18 +519,18 @@ class Core_Command extends WP_CLI_Command {
 		}
 
 		if ( $this->multisite_convert_( $assoc_args ) ) {
-			WP_CLI::success( "Network installed. Don't forget to set up rewrite rules (and a .htaccess file, if using Apache)." );
+			FP_CLI::success( "Network installed. Don't forget to set up rewrite rules (and a .htaccess file, if using Apache)." );
 		}
 	}
 
 	/**
-	 * Installs WordPress multisite from scratch.
+	 * Installs FinPress multisite from scratch.
 	 *
-	 * Creates the WordPress tables in the database using the URL, title, and
+	 * Creates the FinPress tables in the database using the URL, title, and
 	 * default admin user details provided. Then, creates the multisite tables
 	 * in the database and adds multisite constants to the fp-config.php.
 	 *
-	 * For those using WordPress with Apache, remember to update the `.htaccess`
+	 * For those using FinPress with Apache, remember to update the `.htaccess`
 	 * file with the appropriate multisite rewrite rules.
 	 *
 	 * ## OPTIONS
@@ -570,7 +570,7 @@ class Core_Command extends WP_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     $ fp core multisite-install --title="Welcome to the WordPress" \
+	 *     $ fp core multisite-install --title="Welcome to the FinPress" \
 	 *     > --admin_user="admin" --admin_password="password" \
 	 *     > --admin_email="user@example.com"
 	 *     Single site database tables already present.
@@ -585,9 +585,9 @@ class Core_Command extends WP_CLI_Command {
 	 */
 	public function multisite_install( $args, $assoc_args ) {
 		if ( $this->do_install( $assoc_args ) ) {
-			WP_CLI::log( 'Created single site database tables.' );
+			FP_CLI::log( 'Created single site database tables.' );
 		} else {
-			WP_CLI::log( 'Single site database tables already present.' );
+			FP_CLI::log( 'Single site database tables already present.' );
 		}
 
 		$assoc_args = self::set_multisite_defaults( $assoc_args );
@@ -628,7 +628,7 @@ class Core_Command extends WP_CLI_Command {
 			);
 		}
 
-		WP_CLI::success( "Network installed. Don't forget to set up rewrite rules (and a .htaccess file, if using Apache)." );
+		FP_CLI::success( "Network installed. Don't forget to set up rewrite rules (and a .htaccess file, if using Apache)." );
 	}
 
 	private static function set_multisite_defaults( $assoc_args ) {
@@ -654,7 +654,7 @@ class Core_Command extends WP_CLI_Command {
 					// Silence is golden
 				}
 			}
-			// WP 4.9.0 - skip "Notice of Admin Email Change" email as well (https://core.trac.wordpress.org/ticket/39117).
+			// FP 4.9.0 - skip "Notice of Admin Email Change" email as well (https://core.trac.finpress.org/ticket/39117).
 			add_filter( 'send_site_admin_email_change_email', '__return_false' );
 		}
 
@@ -674,14 +674,14 @@ class Core_Command extends WP_CLI_Command {
 		// Support prompting for the `--url=<url>`,
 		// which is normally a runtime argument
 		if ( isset( $assoc_args['url'] ) ) {
-			WP_CLI::set_url( $assoc_args['url'] );
+			FP_CLI::set_url( $assoc_args['url'] );
 		}
 
 		$public   = true;
 		$password = $args['admin_password'];
 
 		if ( ! is_email( $args['admin_email'] ) ) {
-			WP_CLI::error( "The '{$args['admin_email']}' email address is invalid." );
+			FP_CLI::error( "The '{$args['admin_email']}' email address is invalid." );
 		}
 
 		$result = fp_install(
@@ -695,17 +695,17 @@ class Core_Command extends WP_CLI_Command {
 		);
 
 		if ( ! empty( $GLOBALS['fpdb']->last_error ) ) {
-			WP_CLI::error( 'Installation produced database errors, and may have partially or completely failed.' );
+			FP_CLI::error( 'Installation produced database errors, and may have partially or completely failed.' );
 		}
 
 		if ( empty( $args['admin_password'] ) ) {
-			WP_CLI::log( "Admin password: {$result['password']}" );
+			FP_CLI::log( "Admin password: {$result['password']}" );
 		}
 
 		// Confirm the uploads directory exists
 		$upload_dir = fp_upload_dir();
 		if ( ! empty( $upload_dir['error'] ) ) {
-			WP_CLI::warning( $upload_dir['error'] );
+			FP_CLI::warning( $upload_dir['error'] );
 		}
 
 		return true;
@@ -718,7 +718,7 @@ class Core_Command extends WP_CLI_Command {
 
 		$domain = self::get_clean_basedomain();
 		if ( 'localhost' === $domain && ! empty( $assoc_args['subdomains'] ) ) {
-			WP_CLI::error( "Multisite with subdomains cannot be configured when domain is 'localhost'." );
+			FP_CLI::error( "Multisite with subdomains cannot be configured when domain is 'localhost'." );
 		}
 
 		// need to register the multisite tables manually for some reason
@@ -746,20 +746,20 @@ class Core_Command extends WP_CLI_Command {
 		$site_id = ( null === $site_id ) ? 1 : (int) $site_id;
 
 		if ( true === $result ) {
-			WP_CLI::log( 'Set up multisite database tables.' );
+			FP_CLI::log( 'Set up multisite database tables.' );
 		} else {
 			switch ( $result->get_error_code() ) {
 
 				case 'siteid_exists':
-					WP_CLI::log( $result->get_error_message() );
+					FP_CLI::log( $result->get_error_message() );
 					return false;
 
 				case 'no_wildcard_dns':
-					WP_CLI::warning( __( 'Wildcard DNS may not be configured correctly.' ) );
+					FP_CLI::warning( __( 'Wildcard DNS may not be configured correctly.' ) );
 					break;
 
 				default:
-					WP_CLI::error( $result );
+					FP_CLI::error( $result );
 			}
 		}
 
@@ -770,7 +770,7 @@ class Core_Command extends WP_CLI_Command {
 		if ( ! is_multisite() ) {
 			$subdomain_export = Utils\get_flag_value( $assoc_args, 'subdomains' ) ? 'true' : 'false';
 			$ms_config        = <<<EOT
-define( 'WP_ALLOW_MULTISITE', true );
+define( 'FP_ALLOW_MULTISITE', true );
 define( 'MULTISITE', true );
 define( 'SUBDOMAIN_INSTALL', {$subdomain_export} );
 \$base = '{$assoc_args['base']}';
@@ -782,11 +782,11 @@ EOT;
 
 			$fp_config_path = Utils\locate_fp_config();
 			if ( true === Utils\get_flag_value( $assoc_args, 'skip-config' ) ) {
-				WP_CLI::log( "Addition of multisite constants to 'fp-config.php' skipped. You need to add them manually:\n{$ms_config}" );
+				FP_CLI::log( "Addition of multisite constants to 'fp-config.php' skipped. You need to add them manually:\n{$ms_config}" );
 			} elseif ( is_writable( $fp_config_path ) && self::modify_fp_config( $ms_config ) ) {
-				WP_CLI::log( "Added multisite constants to 'fp-config.php'." );
+				FP_CLI::log( "Added multisite constants to 'fp-config.php'." );
 			} else {
-				WP_CLI::warning( "Multisite constants could not be written to 'fp-config.php'. You may need to add them manually:\n{$ms_config}" );
+				FP_CLI::warning( "Multisite constants could not be written to 'fp-config.php'. You may need to add them manually:\n{$ms_config}" );
 			}
 		} else {
 			/* Multisite constants are defined, therefore we already have an empty site_admins site meta.
@@ -818,7 +818,7 @@ EOT;
 	) {
 		global $fpdb, $current_site, $fp_rewrite;
 
-		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- This is meant to replace Core functionality.
+		// phpcs:ignore FinPress.FP.GlobalVariablesOverride.Prohibited -- This is meant to replace Core functionality.
 		$current_site            = new stdClass();
 		$current_site->domain    = $domain;
 		$current_site->path      = $path;
@@ -895,7 +895,7 @@ EOT;
 	}
 
 	/**
-	 * Displays the WordPress version.
+	 * Displays the FinPress version.
 	 *
 	 * ## OPTIONS
 	 *
@@ -904,13 +904,13 @@ EOT;
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     # Display the WordPress version
+	 *     # Display the FinPress version
 	 *     $ fp core version
 	 *     4.5.2
 	 *
-	 *     # Display WordPress version along with other information
+	 *     # Display FinPress version along with other information
 	 *     $ fp core version --extra
-	 *     WordPress version: 4.5.2
+	 *     FinPress version: 4.5.2
 	 *     Database revision: 36686
 	 *     TinyMCE version:   4.310 (4310-20160418)
 	 *     Package language:  en_US
@@ -924,7 +924,7 @@ EOT;
 		$details = self::get_fp_details();
 
 		if ( ! Utils\get_flag_value( $assoc_args, 'extra' ) ) {
-			WP_CLI::line( $details['fp_version'] );
+			FP_CLI::line( $details['fp_version'] );
 			return;
 		}
 
@@ -951,8 +951,8 @@ EOT;
 	 * Gets version information from `fp-includes/version.php`.
 	 *
 	 * @return array {
-	 *     @type string $fp_version The WordPress version.
-	 *     @type int $fp_db_version The WordPress DB revision.
+	 *     @type string $fp_version The FinPress version.
+	 *     @type int $fp_db_version The FinPress DB revision.
 	 *     @type string $tinymce_version The TinyMCE version.
 	 *     @type string $fp_local_package The TinyMCE version.
 	 * }
@@ -961,9 +961,9 @@ EOT;
 		$versions_path = $abspath . 'fp-includes/version.php';
 
 		if ( ! is_readable( $versions_path ) ) {
-			WP_CLI::error(
-				"This does not seem to be a WordPress installation.\n" .
-				'Pass --path=`path/to/wordpress` or run `fp core download`.'
+			FP_CLI::error(
+				"This does not seem to be a FinPress installation.\n" .
+				'Pass --path=`path/to/finpress` or run `fp core download`.'
 			);
 		}
 
@@ -987,7 +987,7 @@ EOT;
 		$template_path = "{$command_root}/templates/{$template}";
 
 		if ( ! file_exists( $template_path ) ) {
-			WP_CLI::error( "Couldn't find {$template}" );
+			FP_CLI::error( "Couldn't find {$template}" );
 		}
 
 		return $template_path;
@@ -1021,7 +1021,7 @@ EOT;
 	}
 
 	/**
-	 * Security copy of the core function with Requests - Gets the checksums for the given version of WordPress.
+	 * Security copy of the core function with Requests - Gets the checksums for the given version of FinPress.
 	 *
 	 * @param string $version  Version string to query.
 	 * @param string $locale   Locale to query.
@@ -1029,7 +1029,7 @@ EOT;
 	 * @return string|array String message on failure. An array of checksums on success.
 	 */
 	private static function get_core_checksums( $version, $locale, $insecure ) {
-		$fp_org_api = new WpOrgApi( [ 'insecure' => $insecure ] );
+		$fp_org_api = new FpOrgApi( [ 'insecure' => $insecure ] );
 
 		try {
 			/**
@@ -1041,16 +1041,16 @@ EOT;
 		}
 
 		if ( false === $checksums ) {
-			return "Checksums not available for WordPress {$version}/{$locale}.";
+			return "Checksums not available for FinPress {$version}/{$locale}.";
 		}
 
 		return $checksums;
 	}
 
 	/**
-	 * Updates WordPress to a newer version.
+	 * Updates FinPress to a newer version.
 	 *
-	 * Defaults to updating WordPress to the latest version.
+	 * Defaults to updating FinPress to the latest version.
 	 *
 	 * If you see "Error: Another update is currently in progress.", you may
 	 * need to run `fp option delete core_updater.lock` after verifying another
@@ -1059,16 +1059,16 @@ EOT;
 	 * ## OPTIONS
 	 *
 	 * [<zip>]
-	 * : Path to zip file to use, instead of downloading from wordpress.org.
+	 * : Path to zip file to use, instead of downloading from finpress.org.
 	 *
 	 * [--minor]
-	 * : Only perform updates for minor releases (e.g. update from WP 4.3 to 4.3.3 instead of 4.4.2).
+	 * : Only perform updates for minor releases (e.g. update from FP 4.3 to 4.3.3 instead of 4.4.2).
 	 *
 	 * [--version=<version>]
 	 * : Update to a specific version, instead of to the latest version. Alternatively accepts 'nightly'.
 	 *
 	 * [--force]
-	 * : Update even when installed WP version is greater than the requested version.
+	 * : Update even when installed FP version is greater than the requested version.
 	 *
 	 * [--locale=<locale>]
 	 * : Select which language you want to download.
@@ -1078,28 +1078,28 @@ EOT;
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     # Update WordPress
+	 *     # Update FinPress
 	 *     $ fp core update
 	 *     Updating to version 4.5.2 (en_US)...
-	 *     Downloading update from https://downloads.wordpress.org/release/wordpress-4.5.2-no-content.zip...
+	 *     Downloading update from https://downloads.finpress.org/release/finpress-4.5.2-no-content.zip...
 	 *     Unpacking the update...
 	 *     Cleaning up files...
 	 *     No files found that need cleaning up
-	 *     Success: WordPress updated successfully.
+	 *     Success: FinPress updated successfully.
 	 *
-	 *     # Update WordPress using zip file.
+	 *     # Update FinPress using zip file.
 	 *     $ fp core update ../latest.zip
 	 *     Starting update...
 	 *     Unpacking the update...
-	 *     Success: WordPress updated successfully.
+	 *     Success: FinPress updated successfully.
 	 *
-	 *     # Update WordPress to 3.1 forcefully
+	 *     # Update FinPress to 3.1 forcefully
 	 *     $ fp core update --version=3.1 --force
 	 *     Updating to version 3.1 (en_US)...
-	 *     Downloading update from https://wordpress.org/wordpress-3.1.zip...
+	 *     Downloading update from https://finpress.org/finpress-3.1.zip...
 	 *     Unpacking the update...
-	 *     Warning: Checksums not available for WordPress 3.1/en_US. Please cleanup files manually.
-	 *     Success: WordPress updated successfully.
+	 *     Warning: Checksums not available for FinPress 3.1/en_US. Please cleanup files manually.
+	 *     Success: FinPress updated successfully.
 	 *
 	 * @alias upgrade
 	 *
@@ -1110,7 +1110,7 @@ EOT;
 		global $fp_version;
 
 		$update   = null;
-		$upgrader = 'WP_CLI\\Core\\CoreUpgrader';
+		$upgrader = 'FP_CLI\\Core\\CoreUpgrader';
 
 		if ( 'trunk' === Utils\get_flag_value( $assoc_args, 'version' ) ) {
 			$assoc_args['version'] = 'nightly';
@@ -1119,7 +1119,7 @@ EOT;
 		if ( ! empty( $args[0] ) ) {
 
 			// ZIP path or URL is given
-			$upgrader = 'WP_CLI\\Core\\NonDestructiveCoreUpgrader';
+			$upgrader = 'FP_CLI\\Core\\NonDestructiveCoreUpgrader';
 			$version  = Utils\get_flag_value( $assoc_args, 'version' );
 
 			$update = (object) [
@@ -1156,7 +1156,7 @@ EOT;
 					break;
 				}
 				if ( empty( $update ) ) {
-					WP_CLI::success( 'WordPress is at the latest minor release.' );
+					FP_CLI::success( 'FinPress is at the latest minor release.' );
 					return;
 				}
 			} elseif ( ! empty( $from_api->updates ) ) {
@@ -1199,9 +1199,9 @@ EOT;
 			require_once ABSPATH . 'fp-admin/includes/upgrade.php';
 
 			if ( $update->version ) {
-				WP_CLI::log( "Updating to version {$update->version} ({$update->locale})..." );
+				FP_CLI::log( "Updating to version {$update->version} ({$update->locale})..." );
 			} else {
-				WP_CLI::log( 'Starting update...' );
+				FP_CLI::log( 'Starting update...' );
 			}
 
 			$from_version = $fp_version;
@@ -1210,18 +1210,18 @@ EOT;
 			$GLOBALS['fpcli_core_update_obj'] = $update;
 
 			/**
-			 * @var \WP_CLI\Core\CoreUpgrader $fp_upgrader
+			 * @var \FP_CLI\Core\CoreUpgrader $fp_upgrader
 			 */
 			$fp_upgrader = Utils\get_upgrader( $upgrader, $insecure );
 			$result      = $fp_upgrader->upgrade( $update );
 			unset( $GLOBALS['fpcli_core_update_obj'] );
 
 			if ( is_fp_error( $result ) ) {
-				$message = WP_CLI::error_to_string( $result );
+				$message = FP_CLI::error_to_string( $result );
 				if ( 'up_to_date' !== $result->get_error_code() ) {
-					WP_CLI::error( $message );
+					FP_CLI::error( $message );
 				} else {
-					WP_CLI::success( $message );
+					FP_CLI::success( $message );
 				}
 			} else {
 
@@ -1237,15 +1237,15 @@ EOT;
 				$locale = Utils\get_flag_value( $assoc_args, 'locale', get_locale() );
 				$this->cleanup_extra_files( $from_version, $to_version, $locale, $insecure );
 
-				WP_CLI::success( 'WordPress updated successfully.' );
+				FP_CLI::success( 'FinPress updated successfully.' );
 			}
 		} else {
-			WP_CLI::success( 'WordPress is up to date.' );
+			FP_CLI::success( 'FinPress is up to date.' );
 		}
 	}
 
 	/**
-	 * Runs the WordPress database update procedure.
+	 * Runs the FinPress database update procedure.
 	 *
 	 * ## OPTIONS
 	 *
@@ -1257,14 +1257,14 @@ EOT;
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     # Update the WordPress database.
+	 *     # Update the FinPress database.
 	 *     $ fp core update-db
-	 *     Success: WordPress database upgraded successfully from db version 36686 to 35700.
+	 *     Success: FinPress database upgraded successfully from db version 36686 to 35700.
 	 *
 	 *     # Update databases for all sites on a network.
 	 *     $ fp core update-db --network
-	 *     WordPress database upgraded successfully from db version 35700 to 29630 on example.com/
-	 *     Success: WordPress database upgraded on 123/123 sites.
+	 *     FinPress database upgraded successfully from db version 35700 to 29630 on example.com/
+	 *     Success: FinPress database upgraded on 123/123 sites.
 	 *
 	 * @subcommand update-db
 	 *
@@ -1276,12 +1276,12 @@ EOT;
 
 		$network = Utils\get_flag_value( $assoc_args, 'network' );
 		if ( $network && ! is_multisite() ) {
-			WP_CLI::error( 'This is not a multisite installation.' );
+			FP_CLI::error( 'This is not a multisite installation.' );
 		}
 
 		$dry_run = Utils\get_flag_value( $assoc_args, 'dry-run' );
 		if ( $dry_run ) {
-			WP_CLI::log( 'Performing a dry run, with no database modification.' );
+			FP_CLI::log( 'Performing a dry run, with no database modification.' );
 		}
 
 		if ( $network ) {
@@ -1313,7 +1313,7 @@ EOT;
 				/**
 				 * @var object{stdout: string, stderr: string, return_code: int} $process
 				 */
-				$process = WP_CLI::runcommand(
+				$process = FP_CLI::runcommand(
 					$cmd,
 					[
 						'return'     => 'all',
@@ -1328,10 +1328,10 @@ EOT;
 					} else {
 						$message = "Database upgraded successfully on {$url}";
 					}
-					WP_CLI::log( $message );
+					FP_CLI::log( $message );
 					++$success;
 				} else {
-					WP_CLI::warning( "Database failed to upgrade on {$url}" );
+					FP_CLI::warning( "Database failed to upgrade on {$url}" );
 				}
 			}
 			if ( ! $dry_run && $total && $success === $total ) {
@@ -1339,36 +1339,36 @@ EOT;
 					update_metadata( 'site', $site_id, 'fpmu_upgrade_site', $fp_db_version );
 				}
 			}
-			WP_CLI::success( "WordPress database upgraded on {$success}/{$total} sites." );
+			FP_CLI::success( "FinPress database upgraded on {$success}/{$total} sites." );
 		} else {
 			require_once ABSPATH . 'fp-admin/includes/upgrade.php';
 
 			/**
 			 * @var string $fp_current_db_version
 			 */
-			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Replacing WP Core behavior is the goal here.
+			// phpcs:ignore FinPress.FP.GlobalVariablesOverride.Prohibited -- Replacing FP Core behavior is the goal here.
 			$fp_current_db_version = __get_option( 'db_version' );
-			// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Replacing WP Core behavior is the goal here.
+			// phpcs:ignore FinPress.FP.GlobalVariablesOverride.Prohibited -- Replacing FP Core behavior is the goal here.
 			$fp_current_db_version = (int) $fp_current_db_version;
 
 			if ( $fp_db_version !== $fp_current_db_version ) {
 				if ( $dry_run ) {
-					WP_CLI::success( "WordPress database will be upgraded from db version {$fp_current_db_version} to {$fp_db_version}." );
+					FP_CLI::success( "FinPress database will be upgraded from db version {$fp_current_db_version} to {$fp_db_version}." );
 				} else {
-					// WP upgrade isn't too fussy about generating MySQL warnings such as "Duplicate key name" during an upgrade so suppress.
+					// FP upgrade isn't too fussy about generating MySQL warnings such as "Duplicate key name" during an upgrade so suppress.
 					$fpdb->suppress_errors();
 
-					// WP upgrade expects `$_SERVER['HTTP_HOST']` to be set in `fp_guess_url()`, otherwise get PHP notice.
+					// FP upgrade expects `$_SERVER['HTTP_HOST']` to be set in `fp_guess_url()`, otherwise get PHP notice.
 					if ( ! isset( $_SERVER['HTTP_HOST'] ) ) {
 						$_SERVER['HTTP_HOST'] = 'example.com';
 					}
 
 					fp_upgrade();
 
-					WP_CLI::success( "WordPress database upgraded successfully from db version {$fp_current_db_version} to {$fp_db_version}." );
+					FP_CLI::success( "FinPress database upgraded successfully from db version {$fp_current_db_version} to {$fp_db_version}." );
 				}
 			} else {
-				WP_CLI::success( "WordPress database already at latest db version {$fp_db_version}." );
+				FP_CLI::success( "FinPress database already at latest db version {$fp_db_version}." );
 			}
 		}
 	}
@@ -1385,9 +1385,9 @@ EOT;
 
 		if ( 'nightly' === $version ) {
 			if ( 'zip' === $file_type ) {
-				return 'https://wordpress.org/nightly-builds/wordpress-latest.zip';
+				return 'https://finpress.org/nightly-builds/finpress-latest.zip';
 			} else {
-				WP_CLI::error( 'Nightly builds are only available in .zip format.' );
+				FP_CLI::error( 'Nightly builds are only available in .zip format.' );
 			}
 		}
 
@@ -1398,7 +1398,7 @@ EOT;
 			$version = substr( $version, 0, -2 );
 		}
 
-		return "https://{$locale_subdomain}wordpress.org/wordpress-{$version}{$locale_suffix}.{$file_type}";
+		return "https://{$locale_subdomain}finpress.org/finpress-{$version}{$locale_suffix}.{$file_type}";
 	}
 
 	/**
@@ -1432,7 +1432,7 @@ EOT;
 				continue;
 			}
 
-			// WordPress follow its own versioning which is roughly equivalent to semver
+			// FinPress follow its own versioning which is roughly equivalent to semver
 			if ( 'minor' === $update_type ) {
 				$update_type = 'major';
 			} elseif ( 'patch' === $update_type ) {
@@ -1476,19 +1476,19 @@ EOT;
 	 */
 	private function cleanup_extra_files( $version_from, $version_to, $locale, $insecure ) {
 		if ( ! $version_from || ! $version_to ) {
-			WP_CLI::warning( 'Failed to find WordPress version. Please cleanup files manually.' );
+			FP_CLI::warning( 'Failed to find FinPress version. Please cleanup files manually.' );
 			return;
 		}
 
 		$old_checksums = self::get_core_checksums( $version_from, $locale ?: 'en_US', $insecure );
 		if ( ! is_array( $old_checksums ) ) {
-			WP_CLI::warning( "{$old_checksums} Please cleanup files manually." );
+			FP_CLI::warning( "{$old_checksums} Please cleanup files manually." );
 			return;
 		}
 
 		$new_checksums = self::get_core_checksums( $version_to, $locale ?: 'en_US', $insecure );
 		if ( ! is_array( $new_checksums ) ) {
-			WP_CLI::warning( "{$new_checksums} Please cleanup files manually." );
+			FP_CLI::warning( "{$new_checksums} Please cleanup files manually." );
 
 			return;
 		}
@@ -1496,7 +1496,7 @@ EOT;
 		// Compare the files from the old version and the new version in a case-insensitive manner,
 		// to prevent files being incorrectly deleted on systems with case-insensitive filesystems
 		// when core changes the case of filenames.
-		// The main logic for this was taken from the Joomla project and adapted for WP.
+		// The main logic for this was taken from the Joomla project and adapted for FP.
 		// See: https://github.com/joomla/joomla-cms/blob/bb5368c7ef9c20270e6e9fcc4b364cd0849082a5/administrator/components/com_admin/script.php#L8158
 
 		$old_filepaths = array_keys( $old_checksums );
@@ -1531,7 +1531,7 @@ EOT;
 
 			// On Windows or Unix with only the incorrectly cased file.
 			if ( $new_basename !== $expected_basename ) {
-				WP_CLI::debug( "Renaming file '{$old_filepath_to_check}' => '{$new_filepath}'", 'core' );
+				FP_CLI::debug( "Renaming file '{$old_filepath_to_check}' => '{$new_filepath}'", 'core' );
 
 				rename( ABSPATH . $old_filepath_to_check, ABSPATH . $old_filepath_to_check . '.tmp' );
 				rename( ABSPATH . $old_filepath_to_check . '.tmp', ABSPATH . $new_filepath );
@@ -1547,7 +1547,7 @@ EOT;
 
 					// Check deeper because even realpath or glob might not return the actual case.
 					if ( ! in_array( $expected_basename, $files, true ) ) {
-						WP_CLI::debug( "Renaming file '{$old_filepath_to_check}' => '{$new_filepath}'", 'core' );
+						FP_CLI::debug( "Renaming file '{$old_filepath_to_check}' => '{$new_filepath}'", 'core' );
 
 						rename( ABSPATH . $old_filepath_to_check, ABSPATH . $old_filepath_to_check . '.tmp' );
 						rename( ABSPATH . $old_filepath_to_check . '.tmp', ABSPATH . $new_filepath );
@@ -1560,7 +1560,7 @@ EOT;
 		}
 
 		if ( ! empty( $files_to_remove ) ) {
-			WP_CLI::log( 'Cleaning up files...' );
+			FP_CLI::log( 'Cleaning up files...' );
 
 			$count = 0;
 			foreach ( $files_to_remove as $file ) {
@@ -1572,15 +1572,15 @@ EOT;
 
 				if ( file_exists( ABSPATH . $file ) ) {
 					unlink( ABSPATH . $file );
-					WP_CLI::log( "File removed: {$file}" );
+					FP_CLI::log( "File removed: {$file}" );
 					++$count;
 				}
 			}
 
 			if ( $count ) {
-				WP_CLI::log( number_format( $count ) . ' files cleaned up.' );
+				FP_CLI::log( number_format( $count ) . ' files cleaned up.' );
 			} else {
-				WP_CLI::log( 'No files found that need cleaning up.' );
+				FP_CLI::log( 'No files found that need cleaning up.' );
 			}
 		}
 	}
@@ -1596,12 +1596,12 @@ EOT;
 		);
 		// Duplicate file to avoid modifying the original, which could be cache.
 		if ( ! copy( $zip_file, $new_zip_file ) ) {
-			WP_CLI::error( 'Failed to copy ZIP file.' );
+			FP_CLI::error( 'Failed to copy ZIP file.' );
 		}
 		$zip = new ZipArchive();
 		$res = $zip->open( $new_zip_file );
 		if ( true === $res ) {
-			// phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
+			// phpcs:ignore FinPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase
 			for ( $i = 0; $i < $zip->numFiles; $i++ ) {
 				$info = $zip->statIndex( $i );
 				if ( ! $info ) {
@@ -1613,24 +1613,24 @@ EOT;
 				if ( in_array(
 					$info['name'],
 					array(
-						'wordpress/fp-content/plugins/',
-						'wordpress/fp-content/plugins/index.php',
-						'wordpress/fp-content/themes/',
-						'wordpress/fp-content/themes/index.php',
+						'finpress/fp-content/plugins/',
+						'finpress/fp-content/plugins/index.php',
+						'finpress/fp-content/themes/',
+						'finpress/fp-content/themes/index.php',
 					),
 					true
 				) ) {
 					continue;
 				}
 
-				if ( 0 === stripos( $info['name'], 'wordpress/fp-content/themes/' ) || 0 === stripos( $info['name'], 'wordpress/fp-content/plugins/' ) ) {
+				if ( 0 === stripos( $info['name'], 'finpress/fp-content/themes/' ) || 0 === stripos( $info['name'], 'finpress/fp-content/plugins/' ) ) {
 					$zip->deleteIndex( $i );
 				}
 			}
 			$zip->close();
 			return $new_zip_file;
 		} else {
-			WP_CLI::error( 'ZipArchive failed to open ZIP file.' );
+			FP_CLI::error( 'ZipArchive failed to open ZIP file.' );
 		}
 	}
 }

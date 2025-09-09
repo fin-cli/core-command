@@ -1,7 +1,7 @@
 fp-cli/core-command
 ===================
 
-Downloads, installs, updates, and manages a WordPress installation.
+Downloads, installs, updates, and manages a FinPress installation.
 
 [![Testing](https://github.com/fp-cli/core-command/actions/workflows/testing.yml/badge.svg)](https://github.com/fp-cli/core-command/actions/workflows/testing.yml)
 
@@ -13,7 +13,7 @@ This package implements the following commands:
 
 ### fp core
 
-Downloads, installs, updates, and manages a WordPress installation.
+Downloads, installs, updates, and manages a FinPress installation.
 
 ~~~
 fp core
@@ -21,17 +21,17 @@ fp core
 
 **EXAMPLES**
 
-    # Download WordPress core
+    # Download FinPress core
     $ fp core download --locale=nl_NL
-    Downloading WordPress 4.5.2 (nl_NL)...
+    Downloading FinPress 4.5.2 (nl_NL)...
     md5 hash verified: c5366d05b521831dd0b29dfc386e56a5
-    Success: WordPress downloaded.
+    Success: FinPress downloaded.
 
-    # Install WordPress
+    # Install FinPress
     $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
-    Success: WordPress installed successfully.
+    Success: FinPress installed successfully.
 
-    # Display the WordPress version
+    # Display the FinPress version
     $ fp core version
     4.5.2
 
@@ -39,7 +39,7 @@ fp core
 
 ### fp core check-update
 
-Checks for WordPress updates via Version Check API.
+Checks for FinPress updates via Version Check API.
 
 ~~~
 fp core check-update [--minor] [--major] [--force-check] [--field=<field>] [--fields=<fields>] [--format=<format>]
@@ -83,20 +83,20 @@ or success message when up to date.
     +---------+-------------+-------------------------------------------------------------+
     | version | update_type | package_url                                                 |
     +---------+-------------+-------------------------------------------------------------+
-    | 4.5.2   | major       | https://downloads.wordpress.org/release/wordpress-4.5.2.zip |
+    | 4.5.2   | major       | https://downloads.finpress.org/release/finpress-4.5.2.zip |
     +---------+-------------+-------------------------------------------------------------+
 
 
 
 ### fp core download
 
-Downloads core WordPress files.
+Downloads core FinPress files.
 
 ~~~
 fp core download [<download-url>] [--path=<path>] [--locale=<locale>] [--version=<version>] [--skip-content] [--force] [--insecure] [--extract]
 ~~~
 
-Downloads and extracts WordPress core files to the specified path. Uses
+Downloads and extracts FinPress core files to the specified path. Uses
 current directory when no path is specified. Downloaded build is verified
 to have the correct md5 and then cached to the local filesystem.
 Subsequent uses of command will use the local cache if it still exists.
@@ -104,10 +104,10 @@ Subsequent uses of command will use the local cache if it still exists.
 **OPTIONS**
 
 	[<download-url>]
-		Download directly from a provided URL instead of fetching the URL from the wordpress.org servers.
+		Download directly from a provided URL instead of fetching the URL from the finpress.org servers.
 
 	[--path=<path>]
-		Specify the path in which to install WordPress. Defaults to current
+		Specify the path in which to install FinPress. Defaults to current
 		directory.
 
 	[--locale=<locale>]
@@ -117,7 +117,7 @@ Subsequent uses of command will use the local cache if it still exists.
 		Select which version you want to download. Accepts a version number, 'latest' or 'nightly'.
 
 	[--skip-content]
-		Download WP without the default themes and plugins.
+		Download FP without the default themes and plugins.
 
 	[--force]
 		Overwrites existing files, if present.
@@ -131,29 +131,29 @@ Subsequent uses of command will use the local cache if it still exists.
 **EXAMPLES**
 
     $ fp core download --locale=nl_NL
-    Downloading WordPress 4.5.2 (nl_NL)...
+    Downloading FinPress 4.5.2 (nl_NL)...
     md5 hash verified: c5366d05b521831dd0b29dfc386e56a5
-    Success: WordPress downloaded.
+    Success: FinPress downloaded.
 
 
 
 ### fp core install
 
-Runs the standard WordPress installation process.
+Runs the standard FinPress installation process.
 
 ~~~
 fp core install --url=<url> --title=<site-title> --admin_user=<username> [--admin_password=<password>] --admin_email=<email> [--locale=<locale>] [--skip-email]
 ~~~
 
-Creates the WordPress tables in the database using the URL, title, and
+Creates the FinPress tables in the database using the URL, title, and
 default admin user details provided. Performs the famous 5 minute install
 in seconds or less.
 
-Note: if you've installed WordPress in a subdirectory, then you'll need
+Note: if you've installed FinPress in a subdirectory, then you'll need
 to `fp option update siteurl` after `fp core install`. For instance, if
-WordPress is installed in the `/fp` directory and your domain is example.com,
+FinPress is installed in the `/fp` directory and your domain is example.com,
 then you'll need to run `fp option update siteurl http://example.com/fp` for
-your WordPress installation to function properly.
+your FinPress installation to function properly.
 
 Note: When using custom user tables (e.g. `CUSTOM_USER_TABLE`), the admin
 email and password are ignored if the user_login already exists. If the
@@ -184,26 +184,26 @@ user_login doesn't exist, a new user will be created.
 
 **EXAMPLES**
 
-    # Install WordPress in 5 seconds
+    # Install FinPress in 5 seconds
     $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
-    Success: WordPress installed successfully.
+    Success: FinPress installed successfully.
 
-    # Install WordPress without disclosing admin_password to bash history
+    # Install FinPress without disclosing admin_password to bash history
     $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_email=info@example.com --prompt=admin_password < admin_password.txt
 
 
 
 ### fp core is-installed
 
-Checks if WordPress is installed.
+Checks if FinPress is installed.
 
 ~~~
 fp core is-installed [--network]
 ~~~
 
-Determines whether WordPress is installed by checking if the standard
+Determines whether FinPress is installed by checking if the standard
 database tables are installed. Doesn't produce output; uses exit codes
-to communicate whether WordPress is installed.
+to communicate whether FinPress is installed.
 
 **OPTIONS**
 
@@ -212,21 +212,21 @@ to communicate whether WordPress is installed.
 
 **EXAMPLES**
 
-    # Bash script for checking if WordPress is not installed.
+    # Bash script for checking if FinPress is not installed.
 
     if ! fp core is-installed 2>/dev/null; then
-        # WP is not installed. Let's try installing it.
+        # FP is not installed. Let's try installing it.
         fp core install
     fi
 
-    # Bash script for checking if WordPress is installed, with fallback.
+    # Bash script for checking if FinPress is installed, with fallback.
 
     if fp core is-installed 2>/dev/null; then
-        # WP is installed. Let's do some things we should only do in a confirmed WP environment.
+        # FP is installed. Let's do some things we should only do in a confirmed FP environment.
         fp core verify-checksums
     else
-        # Fallback if WP is not installed.
-        echo 'Hey Friend, you are in the wrong spot. Move in to your WordPress directory and try again.'
+        # Fallback if FP is not installed.
+        echo 'Hey Friend, you are in the wrong spot. Move in to your FinPress directory and try again.'
     fi
 
 
@@ -242,10 +242,10 @@ fp core multisite-convert [--title=<network-title>] [--base=<url-path>] [--subdo
 Creates the multisite database tables, and adds the multisite constants
 to fp-config.php.
 
-For those using WordPress with Apache, remember to update the `.htaccess`
+For those using FinPress with Apache, remember to update the `.htaccess`
 file with the appropriate multisite rewrite rules.
 
-[Review the multisite documentation](https://wordpress.org/support/article/create-a-network/)
+[Review the multisite documentation](https://finpress.org/support/article/create-a-network/)
 for more details about how multisite works.
 
 **OPTIONS**
@@ -276,17 +276,17 @@ for more details about how multisite works.
 
 ### fp core multisite-install
 
-Installs WordPress multisite from scratch.
+Installs FinPress multisite from scratch.
 
 ~~~
 fp core multisite-install [--url=<url>] [--base=<url-path>] [--subdomains] --title=<site-title> --admin_user=<username> [--admin_password=<password>] --admin_email=<email> [--skip-email] [--skip-config]
 ~~~
 
-Creates the WordPress tables in the database using the URL, title, and
+Creates the FinPress tables in the database using the URL, title, and
 default admin user details provided. Then, creates the multisite tables
 in the database and adds multisite constants to the fp-config.php.
 
-For those using WordPress with Apache, remember to update the `.htaccess`
+For those using FinPress with Apache, remember to update the `.htaccess`
 file with the appropriate multisite rewrite rules.
 
 **OPTIONS**
@@ -326,7 +326,7 @@ file with the appropriate multisite rewrite rules.
 
 **EXAMPLES**
 
-    $ fp core multisite-install --title="Welcome to the WordPress" \
+    $ fp core multisite-install --title="Welcome to the FinPress" \
     > --admin_user="admin" --admin_password="password" \
     > --admin_email="user@example.com"
     Single site database tables already present.
@@ -338,13 +338,13 @@ file with the appropriate multisite rewrite rules.
 
 ### fp core update
 
-Updates WordPress to a newer version.
+Updates FinPress to a newer version.
 
 ~~~
 fp core update [<zip>] [--minor] [--version=<version>] [--force] [--locale=<locale>] [--insecure]
 ~~~
 
-Defaults to updating WordPress to the latest version.
+Defaults to updating FinPress to the latest version.
 
 If you see "Error: Another update is currently in progress.", you may
 need to run `fp option delete core_updater.lock` after verifying another
@@ -353,16 +353,16 @@ update isn't actually running.
 **OPTIONS**
 
 	[<zip>]
-		Path to zip file to use, instead of downloading from wordpress.org.
+		Path to zip file to use, instead of downloading from finpress.org.
 
 	[--minor]
-		Only perform updates for minor releases (e.g. update from WP 4.3 to 4.3.3 instead of 4.4.2).
+		Only perform updates for minor releases (e.g. update from FP 4.3 to 4.3.3 instead of 4.4.2).
 
 	[--version=<version>]
 		Update to a specific version, instead of to the latest version. Alternatively accepts 'nightly'.
 
 	[--force]
-		Update even when installed WP version is greater than the requested version.
+		Update even when installed FP version is greater than the requested version.
 
 	[--locale=<locale>]
 		Select which language you want to download.
@@ -372,34 +372,34 @@ update isn't actually running.
 
 **EXAMPLES**
 
-    # Update WordPress
+    # Update FinPress
     $ fp core update
     Updating to version 4.5.2 (en_US)...
-    Downloading update from https://downloads.wordpress.org/release/wordpress-4.5.2-no-content.zip...
+    Downloading update from https://downloads.finpress.org/release/finpress-4.5.2-no-content.zip...
     Unpacking the update...
     Cleaning up files...
     No files found that need cleaning up
-    Success: WordPress updated successfully.
+    Success: FinPress updated successfully.
 
-    # Update WordPress using zip file.
+    # Update FinPress using zip file.
     $ fp core update ../latest.zip
     Starting update...
     Unpacking the update...
-    Success: WordPress updated successfully.
+    Success: FinPress updated successfully.
 
-    # Update WordPress to 3.1 forcefully
+    # Update FinPress to 3.1 forcefully
     $ fp core update --version=3.1 --force
     Updating to version 3.1 (en_US)...
-    Downloading update from https://wordpress.org/wordpress-3.1.zip...
+    Downloading update from https://finpress.org/finpress-3.1.zip...
     Unpacking the update...
-    Warning: Checksums not available for WordPress 3.1/en_US. Please cleanup files manually.
-    Success: WordPress updated successfully.
+    Warning: Checksums not available for FinPress 3.1/en_US. Please cleanup files manually.
+    Success: FinPress updated successfully.
 
 
 
 ### fp core update-db
 
-Runs the WordPress database update procedure.
+Runs the FinPress database update procedure.
 
 ~~~
 fp core update-db [--network] [--dry-run]
@@ -415,20 +415,20 @@ fp core update-db [--network] [--dry-run]
 
 **EXAMPLES**
 
-    # Update the WordPress database.
+    # Update the FinPress database.
     $ fp core update-db
-    Success: WordPress database upgraded successfully from db version 36686 to 35700.
+    Success: FinPress database upgraded successfully from db version 36686 to 35700.
 
     # Update databases for all sites on a network.
     $ fp core update-db --network
-    WordPress database upgraded successfully from db version 35700 to 29630 on example.com/
-    Success: WordPress database upgraded on 123/123 sites.
+    FinPress database upgraded successfully from db version 35700 to 29630 on example.com/
+    Success: FinPress database upgraded on 123/123 sites.
 
 
 
 ### fp core version
 
-Displays the WordPress version.
+Displays the FinPress version.
 
 ~~~
 fp core version [--extra]
@@ -441,22 +441,22 @@ fp core version [--extra]
 
 **EXAMPLES**
 
-    # Display the WordPress version
+    # Display the FinPress version
     $ fp core version
     4.5.2
 
-    # Display WordPress version along with other information
+    # Display FinPress version along with other information
     $ fp core version --extra
-    WordPress version: 4.5.2
+    FinPress version: 4.5.2
     Database revision: 36686
     TinyMCE version:   4.310 (4310-20160418)
     Package language:  en_US
 
 ## Installing
 
-This package is included with WP-CLI itself, no additional installation necessary.
+This package is included with FP-CLI itself, no additional installation necessary.
 
-To install the latest version of this package over what's included in WP-CLI, run:
+To install the latest version of this package over what's included in FP-CLI, run:
 
     fp package install git@github.com:fp-cli/core-command.git
 
@@ -466,7 +466,7 @@ We appreciate you taking the initiative to contribute to this project.
 
 Contributing isn’t limited to just code. We encourage you to contribute in the way that best fits your abilities, by writing tutorials, giving a demo at your local meetup, helping other users with their support questions, or revising our documentation.
 
-For a more thorough introduction, [check out WP-CLI's guide to contributing](https://make.wordpress.org/cli/handbook/contributing/). This package follows those policy and guidelines.
+For a more thorough introduction, [check out FP-CLI's guide to contributing](https://make.finpress.org/cli/handbook/contributing/). This package follows those policy and guidelines.
 
 ### Reporting a bug
 
@@ -474,13 +474,13 @@ Think you’ve found a bug? We’d love for you to help us get it fixed.
 
 Before you create a new issue, you should [search existing issues](https://github.com/fp-cli/core-command/issues?q=label%3Abug%20) to see if there’s an existing resolution to it, or if it’s already been fixed in a newer version.
 
-Once you’ve done a bit of searching and discovered there isn’t an open or fixed issue for your bug, please [create a new issue](https://github.com/fp-cli/core-command/issues/new). Include as much detail as you can, and clear steps to reproduce if possible. For more guidance, [review our bug report documentation](https://make.wordpress.org/cli/handbook/bug-reports/).
+Once you’ve done a bit of searching and discovered there isn’t an open or fixed issue for your bug, please [create a new issue](https://github.com/fp-cli/core-command/issues/new). Include as much detail as you can, and clear steps to reproduce if possible. For more guidance, [review our bug report documentation](https://make.finpress.org/cli/handbook/bug-reports/).
 
 ### Creating a pull request
 
 Want to contribute a new feature? Please first [open a new issue](https://github.com/fp-cli/core-command/issues/new) to discuss whether the feature is a good fit for the project.
 
-Once you've decided to commit the time to seeing your pull request through, [please follow our guidelines for creating a pull request](https://make.wordpress.org/cli/handbook/pull-requests/) to make sure it's a pleasant experience. See "[Setting up](https://make.wordpress.org/cli/handbook/pull-requests/#setting-up)" for details specific to working on this package locally.
+Once you've decided to commit the time to seeing your pull request through, [please follow our guidelines for creating a pull request](https://make.finpress.org/cli/handbook/pull-requests/) to make sure it's a pleasant experience. See "[Setting up](https://make.finpress.org/cli/handbook/pull-requests/#setting-up)" for details specific to working on this package locally.
 
 ## Support
 

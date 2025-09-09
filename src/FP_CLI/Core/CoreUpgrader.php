@@ -1,13 +1,13 @@
 <?php
 
-namespace WP_CLI\Core;
+namespace FP_CLI\Core;
 
 use Exception;
-use WP_CLI;
-use WP_CLI\Utils;
-use WP_Error;
+use FP_CLI;
+use FP_CLI\Utils;
+use FP_Error;
 use Core_Upgrader as DefaultCoreUpgrader;
-use WP_Filesystem_Base;
+use FP_Filesystem_Base;
 
 /**
  * A Core Upgrader class that caches the download, and uses cached if available.
@@ -26,7 +26,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 	/**
 	 * CoreUpgrader constructor.
 	 *
-	 * @param \WP_Upgrader_Skin|null $skin
+	 * @param \FP_Upgrader_Skin|null $skin
 	 * @param bool                   $insecure
 	 */
 	public function __construct( $skin = null, $insecure = false ) {
@@ -43,7 +43,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 	 *                                 existing local file, it will be returned untouched.
 	 * @param bool   $check_signatures Whether to validate file signatures. Default false.
 	 * @param array  $hook_extra       Extra arguments to pass to the filter hooks. Default empty array.
-	 * @return string|WP_Error The full path to the downloaded package file, or a WP_Error object.
+	 * @return string|FP_Error The full path to the downloaded package file, or a FP_Error object.
 	 */
 	public function download_package( $package, $check_signatures = false, $hook_extra = [] ) {
 
@@ -55,11 +55,11 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		 *
 		 * @param bool         $reply      Whether to bail without returning the package. Default is false.
 		 * @param string       $package    The package file name.
-		 * @param \WP_Upgrader $upgrader   The WP_Upgrader instance.
+		 * @param \FP_Upgrader $upgrader   The FP_Upgrader instance.
 		 * @param array        $hook_extra Extra arguments passed to hooked filters.
 		 */
 		$reply = apply_filters(
-			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Override existing hook from Core.
+			// phpcs:ignore FinPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- Override existing hook from Core.
 			'upgrader_pre_download',
 			false,
 			$package,
@@ -68,7 +68,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		);
 
 		/**
-		 * @var false|string|\WP_Error $reply
+		 * @var false|string|\FP_Error $reply
 		 */
 
 		if ( false !== $reply ) {
@@ -81,7 +81,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		}
 
 		if ( empty( $package ) ) {
-			return new WP_Error( 'no_package', $this->strings['no_package'] );
+			return new FP_Error( 'no_package', $this->strings['no_package'] );
 		}
 
 		$filename  = pathinfo( $package, PATHINFO_FILENAME );
@@ -96,7 +96,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 			}
 		);
 
-		$cache     = WP_CLI::get_cache();
+		$cache     = FP_CLI::get_cache();
 		$update    = $GLOBALS['fpcli_core_update_obj'];
 		$cache_key = "core/{$filename}-{$update->locale}.{$extension}";
 
@@ -105,9 +105,9 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		 */
 		$cache_file = $cache->has( $cache_key );
 
-		if ( $cache_file && false === stripos( $package, 'https://wordpress.org/nightly-builds/' )
-			&& false === stripos( $package, 'http://wordpress.org/nightly-builds/' ) ) {
-			WP_CLI::log( "Using cached file '{$cache_file}'..." );
+		if ( $cache_file && false === stripos( $package, 'https://finpress.org/nightly-builds/' )
+			&& false === stripos( $package, 'http://finpress.org/nightly-builds/' ) ) {
+			FP_CLI::log( "Using cached file '{$cache_file}'..." );
 			copy( $cache_file, $temp );
 			return $temp;
 		}
@@ -127,17 +127,17 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		$this->skin->feedback( 'downloading_package', $package );
 
 		try {
-			/** @var \WpOrg\Requests\Response $response */
+			/** @var \FpOrg\Requests\Response $response */
 			$response = Utils\http_request( 'GET', $package, null, $headers, $options );
 		} catch ( Exception $e ) {
-			return new WP_Error( 'download_failed', $e->getMessage() );
+			return new FP_Error( 'download_failed', $e->getMessage() );
 		}
 
 		if ( ! is_null( $response ) && 200 !== (int) $response->status_code ) {
-			return new WP_Error( 'download_failed', $this->strings['download_failed'] );
+			return new FP_Error( 'download_failed', $this->strings['download_failed'] );
 		}
 
-		if ( false === stripos( $package, 'https://wordpress.org/nightly-builds/' ) ) {
+		if ( false === stripos( $package, 'https://finpress.org/nightly-builds/' ) ) {
 			$cache->import( $cache_key, $temp );
 		}
 
@@ -145,16 +145,16 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 	}
 
 	/**
-	 * Upgrade WordPress core.
+	 * Upgrade FinPress core.
 	 *
 	 * @access public
 	 *
-	 * @global WP_Filesystem_Base $fp_filesystem Subclass
+	 * @global FP_Filesystem_Base $fp_filesystem Subclass
 	 * @global callable           $_fp_filesystem_direct_method
 	 *
-	 * @param object $current Response object for whether WordPress is current.
+	 * @param object $current Response object for whether FinPress is current.
 	 * @param array  $args {
-	 *        Optional. Arguments for upgrading WordPress core. Default empty array.
+	 *        Optional. Arguments for upgrading FinPress core. Default empty array.
 	 *
 	 *        @type bool $pre_check_md5    Whether to check the file checksums before
 	 *                                     attempting the upgrade. Default true.
@@ -163,7 +163,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 	 *        @type bool $do_rollback      Whether to perform this "upgrade" as a rollback.
 	 *                                     Default false.
 	 * }
-	 * @return string|false|WP_Error New WordPress version on success, false or WP_Error on failure.
+	 * @return string|false|FP_Error New FinPress version on success, false or FP_Error on failure.
 	 */
 	public function upgrade( $current, $args = [] ) {
 		set_error_handler( [ __CLASS__, 'error_handler' ], E_USER_WARNING | E_USER_NOTICE );
@@ -176,7 +176,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 	}
 
 	/**
-	 * Error handler to ignore failures on accessing SSL "https://api.wordpress.org/core/checksums/1.0/" in `get_core_checksums()` which seem to occur intermittently.
+	 * Error handler to ignore failures on accessing SSL "https://api.finpress.org/core/checksums/1.0/" in `get_core_checksums()` which seem to occur intermittently.
 	 */
 	public static function error_handler( $errno, $errstr, $errfile, $errline, $errcontext = null ) {
 		// If ignoring E_USER_WARNING | E_USER_NOTICE, default.

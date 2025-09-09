@@ -1,4 +1,4 @@
-Feature: Download WordPress
+Feature: Download FinPress
 
   Scenario: Empty dir
     Given an empty directory
@@ -8,14 +8,14 @@ Feature: Download WordPress
     Then the return code should be 1
     And STDERR should contain:
       """
-      Error: This does not seem to be a WordPress install
+      Error: This does not seem to be a FinPress install
       """
     And STDOUT should be empty
 
     When I run `fp core download`
-    And save STDOUT 'Downloading WordPress ([\d\.]+)' as {VERSION}
+    And save STDOUT 'Downloading FinPress ([\d\.]+)' as {VERSION}
     Then the fp-settings.php file should exist
-    And the {SUITE_CACHE_DIR}/core/wordpress-{VERSION}-en_US.tar.gz file should exist
+    And the {SUITE_CACHE_DIR}/core/finpress-{VERSION}-en_US.tar.gz file should exist
 
     When I run `mkdir inner`
     And I run `cd inner && fp core download`
@@ -24,14 +24,14 @@ Feature: Download WordPress
     When I try `fp core download --path=inner`
     Then STDERR should be:
       """
-      Error: WordPress files seem to already be present here.
+      Error: FinPress files seem to already be present here.
       """
     And the return code should be 1
 
-    When I try `WP_CLI_STRICT_ARGS_MODE=1 fp core download --path=inner`
+    When I try `FP_CLI_STRICT_ARGS_MODE=1 fp core download --path=inner`
     Then STDERR should be:
       """
-      Error: WordPress files seem to already be present here.
+      Error: FinPress files seem to already be present here.
       """
     And the return code should be 1
 
@@ -40,18 +40,18 @@ Feature: Download WordPress
     Then the fp-settings.php file should exist
     And STDOUT should contain:
       """
-      Using cached file '{SUITE_CACHE_DIR}/core/wordpress-{VERSION}-en_US.tar.gz'...
+      Using cached file '{SUITE_CACHE_DIR}/core/finpress-{VERSION}-en_US.tar.gz'...
       """
 
   Scenario: Localized install
     Given an empty directory
     And an empty cache
     When I run `fp core download --version=4.4.2 --locale=de_DE`
-    And save STDOUT 'Downloading WordPress ([\d\.]+)' as {VERSION}
+    And save STDOUT 'Downloading FinPress ([\d\.]+)' as {VERSION}
     Then the fp-settings.php file should exist
-    And the {SUITE_CACHE_DIR}/core/wordpress-{VERSION}-de_DE.tar.gz file should exist
+    And the {SUITE_CACHE_DIR}/core/finpress-{VERSION}-de_DE.tar.gz file should exist
 
-  Scenario: Catch download of non-existent WP version
+  Scenario: Catch download of non-existent FP version
     Given an empty directory
 
     When I try `fp core download --version=1.0.3 --force`
@@ -65,14 +65,14 @@ Feature: Download WordPress
     Given an empty directory
     And an empty cache
 
-    When I run `fp core download https://wordpress.org/wordpress-4.9.12.zip`
+    When I run `fp core download https://finpress.org/finpress-4.9.12.zip`
     Then the fp-settings.php file should exist
     And the {SUITE_CACHE_DIR}/core directory should not exist
     And STDOUT should contain:
       """
-      Downloading from https://wordpress.org/wordpress-4.9.12.zip ...
+      Downloading from https://finpress.org/finpress-4.9.12.zip ...
       md5 hash verified: 702c94bc3aa8a37091f9fb075d57d847
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
 
   Scenario: Verify release hash when downloading new version
@@ -83,20 +83,20 @@ Feature: Download WordPress
     Then STDOUT should contain:
       """
       md5 hash verified: 1907d1dbdac7a009d89224a516496b8d
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
 
   Scenario: Core download to a directory specified by `--path` in custom command
-    Given a WP install
+    Given a FP install
     And a download-command.php file:
       """
       <?php
-      class Download_Command extends WP_CLI_Command {
+      class Download_Command extends FP_CLI_Command {
           public function __invoke() {
-              WP_CLI::run_command( array( 'core', 'download' ), array( 'path' => 'src/' ) );
+              FP_CLI::run_command( array( 'core', 'download' ), array( 'path' => 'src/' ) );
           }
       }
-      WP_CLI::add_command( 'custom-download', 'Download_Command' );
+      FP_CLI::add_command( 'custom-download', 'Download_Command' );
       """
 
     When I run `fp --require=download-command.php custom-download`
@@ -109,7 +109,7 @@ Feature: Download WordPress
     When I try `fp --require=download-command.php custom-download`
     Then STDERR should be:
       """
-      Error: WordPress files seem to already be present here.
+      Error: FinPress files seem to already be present here.
       """
     And the return code should be 1
 
@@ -121,7 +121,7 @@ Feature: Download WordPress
     And the fp-includes/class-fp-comment.php file should exist
     And STDERR should not contain:
       """
-      Warning: Failed to find WordPress version. Please cleanup files manually.
+      Warning: Failed to find FinPress version. Please cleanup files manually.
       """
 
     When I run `fp core download --version=4.3.2 --force`
@@ -138,10 +138,10 @@ Feature: Download WordPress
 
     When I try `fp core download --version=nightly`
     Then the fp-settings.php file should exist
-    And the {SUITE_CACHE_DIR}/core/wordpress-nightly-en_US.zip file should not exist
+    And the {SUITE_CACHE_DIR}/core/finpress-nightly-en_US.zip file should not exist
     And STDOUT should contain:
       """
-      Downloading WordPress nightly (en_US)...
+      Downloading FinPress nightly (en_US)...
       """
     And STDERR should contain:
       """
@@ -149,7 +149,7 @@ Feature: Download WordPress
       """
     And STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
     And the return code should be 0
 
@@ -158,7 +158,7 @@ Feature: Download WordPress
     Then the fp-settings.php file should exist
     And STDOUT should not contain:
       """
-      Using cached file '{SUITE_CACHE_DIR}/core/wordpress-nightly-en_US.zip'...
+      Using cached file '{SUITE_CACHE_DIR}/core/finpress-nightly-en_US.zip'...
       """
     And STDERR should contain:
       """
@@ -166,7 +166,7 @@ Feature: Download WordPress
       """
     And STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
     And the return code should be 0
 
@@ -178,15 +178,15 @@ Feature: Download WordPress
     When I try `fp core download --version=nightly --force`
     Then STDERR should not contain:
       """
-      Failed to find WordPress version
+      Failed to find FinPress version
       """
     And STDERR should contain:
       """
-      Warning: Checksums not available for WordPress nightly/en_US. Please cleanup files manually.
+      Warning: Checksums not available for FinPress nightly/en_US. Please cleanup files manually.
       """
     And STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
     And the return code should be 0
 
@@ -197,11 +197,11 @@ Feature: Download WordPress
     Then the fp-settings.php file should exist
     And STDERR should not contain:
       """
-      Warning: Failed to find WordPress version. Please cleanup files manually.
+      Warning: Failed to find FinPress version. Please cleanup files manually.
       """
     And STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
     And the return code should be 0
 
@@ -220,7 +220,7 @@ Feature: Download WordPress
     Then the fp-settings.php file should exist
     And STDOUT should contain:
       """
-      Downloading WordPress nightly (en_US)...
+      Downloading FinPress nightly (en_US)...
       """
     And STDERR should contain:
       """
@@ -228,7 +228,7 @@ Feature: Download WordPress
       """
     And STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
     And the return code should be 0
 
@@ -259,9 +259,9 @@ Feature: Download WordPress
     Then the fp-settings.php file should exist
     And STDOUT should contain:
       """
-      Downloading WordPress 4.6-RC2 (en_US)...
+      Downloading FinPress 4.6-RC2 (en_US)...
       md5 hash verified: 90c93a15092b2d5d4c960ec1fc183e07
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
 
   Scenario: Using --version=latest should produce a cache key of the version number, not 'latest'
@@ -271,13 +271,13 @@ Feature: Download WordPress
     When I run `fp core download --version=latest`
     Then STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
 
     When I run `fp core version`
     Then save STDOUT as {VERSION}
-    And the {SUITE_CACHE_DIR}/core/wordpress-latest-en_US.tar.gz file should not exist
-    And the {SUITE_CACHE_DIR}/core/wordpress-{VERSION}-en_US.tar.gz file should exist
+    And the {SUITE_CACHE_DIR}/core/finpress-latest-en_US.tar.gz file should not exist
+    And the {SUITE_CACHE_DIR}/core/finpress-{VERSION}-en_US.tar.gz file should exist
 
   Scenario: Fail if path can't be created
     Given an empty directory
@@ -296,7 +296,7 @@ Feature: Download WordPress
       """
     And the return code should be 1
 
-    When I try `WP_CLI_STRICT_ARGS_MODE=1 fp core download --path=non-directory-path`
+    When I try `FP_CLI_STRICT_ARGS_MODE=1 fp core download --path=non-directory-path`
     Then STDERR should contain:
       """
       Failed to create directory
@@ -307,7 +307,7 @@ Feature: Download WordPress
       """
     And the return code should be 1
 
-    When I try `WP_CLI_STRICT_ARGS_MODE=1 fp core download --path=non-directory-path\\`
+    When I try `FP_CLI_STRICT_ARGS_MODE=1 fp core download --path=non-directory-path\\`
     Then STDERR should contain:
       """
       Failed to create directory
@@ -329,7 +329,7 @@ Feature: Download WordPress
       """
     And the return code should be 1
 
-    When I try `WP_CLI_STRICT_ARGS_MODE=1 fp core download --path=/root-level-directory`
+    When I try `FP_CLI_STRICT_ARGS_MODE=1 fp core download --path=/root-level-directory`
     Then STDERR should contain:
       """
       Insufficient permission to create directory
@@ -346,7 +346,7 @@ Feature: Download WordPress
     When I run `fp core download --skip-content`
     Then STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
     And the fp-includes directory should exist
     And the fp-content/plugins directory should exist
@@ -362,7 +362,7 @@ Feature: Download WordPress
     When I run `fp core download --skip-content`
     Then STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
     And the fp-includes directory should exist
     And the fp-content/themes directory should exist
@@ -378,7 +378,7 @@ Feature: Download WordPress
     When I run `fp core download --skip-content --version=4.9.11 --locale=nl_NL`
     Then STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
     And the fp-includes directory should exist
     And the fp-content/plugins directory should exist
@@ -394,7 +394,7 @@ Feature: Download WordPress
     When I run `fp core download --skip-content --version=4.9.11 --locale=nl_NL`
     Then STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
     And the fp-includes directory should exist
     And the fp-content/themes directory should exist
@@ -410,7 +410,7 @@ Feature: Download WordPress
     When I try `fp core download --skip-content --version=4.7`
     Then STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
     And the fp-includes directory should exist
     And the fp-content/plugins directory should exist
@@ -431,14 +431,14 @@ Feature: Download WordPress
 
     When I run `fp core download --version=4.5 --locale=de_DE`
     Then the fp-content directory should exist
-    And the wordpress-4.5-de_DE.tar.gz file should not exist
+    And the finpress-4.5-de_DE.tar.gz file should not exist
 
   Scenario: Core download with extract parameter should unzip the download file
     Given an empty directory
 
     When I run `fp core download --version=4.5 --locale=de_DE --extract`
     Then the fp-content directory should exist
-    And the wordpress-4.5-de_DE.tar.gz file should not exist
+    And the finpress-4.5-de_DE.tar.gz file should not exist
 
   Scenario: Core download with extract parameter should unzip the download file (already cached)
     Given an empty directory
@@ -447,23 +447,23 @@ Feature: Download WordPress
     And I run `rm -rf *`
     And I run `fp core download --version=4.5 --locale=de_DE --extract`
     Then the fp-content directory should exist
-    And the wordpress-4.5-de_DE.tar.gz file should not exist
+    And the finpress-4.5-de_DE.tar.gz file should not exist
 
   Scenario: Core download with no-extract should not unzip the download file
     Given an empty directory
 
     When I run `fp core download --version=4.5 --locale=de_DE --no-extract`
     Then the fp-content directory should not exist
-    And the wordpress-4.5-de_DE.tar.gz file should exist
+    And the finpress-4.5-de_DE.tar.gz file should exist
 
   Scenario: Core download with no-extract should not unzip the download file (already cached)
     Given an empty directory
 
     When I run `fp core download --version=4.5 --locale=de_DE --no-extract`
-    And I run `rm -rf wordpress-4.5-de_DE.tar.gz`
+    And I run `rm -rf finpress-4.5-de_DE.tar.gz`
     And I run `fp core download --version=4.5 --locale=de_DE --no-extract`
     Then the fp-content directory should not exist
-    And the wordpress-4.5-de_DE.tar.gz file should exist
+    And the finpress-4.5-de_DE.tar.gz file should exist
 
   Scenario: Error when using both --skip-content and --no-extract
     Given an empty directory

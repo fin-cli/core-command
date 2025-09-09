@@ -1,6 +1,6 @@
 <?php
 
-namespace WP_CLI\Core;
+namespace FP_CLI\Core;
 
 /**
  * A Core Upgrader class that leaves packages intact by default.

@@ -1,17 +1,17 @@
 Feature: Check for more recent versions
 
-  # This test downgrades to an older WordPress version, but the SQLite plugin requires 6.0+
+  # This test downgrades to an older FinPress version, but the SQLite plugin requires 6.0+
   @require-mysql
   Scenario: Check for update via Version Check API
-    Given a WP install
+    Given a FP install
     And I try `fp theme install twentytwenty --activate`
 
     When I run `fp core download --version=5.8 --force`
     Then STDOUT should not be empty
 
     When I run `fp core check-update --format=csv`
-    Then STDOUT should match #{WP_VERSION-latest},major,https://downloads.(w|wordpress).org/release/wordpress-{WP_VERSION-latest}.zip#
-    And STDOUT should match #{WP_VERSION-5.8-latest},minor,https://downloads.(w|wordpress).org/release/wordpress-{WP_VERSION-5.8-latest}-partial-0.zip#
+    Then STDOUT should match #{FP_VERSION-latest},major,https://downloads.(w|finpress).org/release/finpress-{FP_VERSION-latest}.zip#
+    And STDOUT should match #{FP_VERSION-5.8-latest},minor,https://downloads.(w|finpress).org/release/finpress-{FP_VERSION-5.8-latest}-partial-0.zip#
 
     When I run `fp core check-update --format=count`
     Then STDOUT should be:
@@ -20,7 +20,7 @@ Feature: Check for more recent versions
       """
 
     When I run `fp core check-update --major --format=csv`
-    Then STDOUT should match #{WP_VERSION-latest},major,https://downloads.(w|wordpress).org/release/wordpress-{WP_VERSION-latest}.zip#
+    Then STDOUT should match #{FP_VERSION-latest},major,https://downloads.(w|finpress).org/release/finpress-{FP_VERSION-latest}.zip#
 
     When I run `fp core check-update --major --format=count`
     Then STDOUT should be:
@@ -29,7 +29,7 @@ Feature: Check for more recent versions
       """
 
     When I run `fp core check-update --minor --format=csv`
-    Then STDOUT should match #{WP_VERSION-5.8-latest},minor,https://downloads.(w|wordpress).org/release/wordpress-{WP_VERSION-5.8-latest}-partial-0.zip#
+    Then STDOUT should match #{FP_VERSION-5.8-latest},minor,https://downloads.(w|finpress).org/release/finpress-{FP_VERSION-5.8-latest}-partial-0.zip#
 
     When I run `fp core check-update --minor --format=count`
     Then STDOUT should be:
@@ -38,7 +38,7 @@ Feature: Check for more recent versions
       """
 
   Scenario: Check output of check update in different formats (no updates available)
-    Given a WP install
+    Given a FP install
     And a setup.php file:
       """
       <?php
@@ -56,7 +56,7 @@ Feature: Check for more recent versions
     When I run `fp core check-update`
     Then STDOUT should be:
       """
-      Success: WordPress is at the latest version.
+      Success: FinPress is at the latest version.
       """
 
     When I run `fp core check-update --format=json`

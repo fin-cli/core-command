@@ -1,6 +1,6 @@
 <?php
 
-if ( ! class_exists( 'WP_CLI' ) ) {
+if ( ! class_exists( 'FP_CLI' ) ) {
 	return;
 }
 
@@ -9,4 +9,4 @@ if ( file_exists( $fpcli_core_autoloader ) ) {
 	require_once $fpcli_core_autoloader;
 }
 
-WP_CLI::add_command( 'core', 'Core_Command' );
+FP_CLI::add_command( 'core', 'Core_Command' );

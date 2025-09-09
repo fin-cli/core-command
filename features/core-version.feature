@@ -1,7 +1,7 @@
-Feature: Find version for WordPress install
+Feature: Find version for FinPress install
 
   Scenario: Verify core version
-    Given a WP install
+    Given a FP install
     And I run `fp core download --version=4.4.2 --force`
 
     When I run `fp core version`
@@ -13,26 +13,26 @@ Feature: Find version for WordPress install
     When I run `fp core version --extra`
     Then STDOUT should be:
       """
-      WordPress version: 4.4.2
+      FinPress version: 4.4.2
       Database revision: 35700
       TinyMCE version:   4.208 (4208-20151113)
       Package language:  en_US
       """
 
-  Scenario: Installing WordPress for a non-default locale and verify core extended version information.
+  Scenario: Installing FinPress for a non-default locale and verify core extended version information.
     Given an empty directory
     And an empty cache
 
     When I run `fp core download --version=4.4.2 --locale=de_DE`
     Then STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
 
     When I run `fp core version --extra`
     Then STDOUT should be:
       """
-      WordPress version: 4.4.2
+      FinPress version: 4.4.2
       Database revision: 35700
       TinyMCE version:   4.208 (4208-20151113)
       Package language:  de_DE

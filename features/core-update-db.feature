@@ -1,13 +1,13 @@
 Feature: Update core's database
 
-  # This test downgrades to an older WordPress version, but the SQLite plugin requires 6.0+
+  # This test downgrades to an older FinPress version, but the SQLite plugin requires 6.0+
   @require-mysql
   Scenario: Update db on a single site
-    Given a WP install
+    Given a FP install
     And a disable_sidebar_check.php file:
       """
       <?php
-      WP_CLI::add_fp_hook( 'init', static function () {
+      FP_CLI::add_fp_hook( 'init', static function () {
         remove_action( 'after_switch_theme', '_fp_sidebars_changed' );
       } );
       """
@@ -18,23 +18,23 @@ Feature: Update core's database
     When I run `fp core update-db`
     Then STDOUT should contain:
       """
-      Success: WordPress database upgraded successfully from db version 45805 to 47018.
+      Success: FinPress database upgraded successfully from db version 45805 to 47018.
       """
 
     When I run `fp core update-db`
     Then STDOUT should contain:
       """
-      Success: WordPress database already at latest db version 47018.
+      Success: FinPress database already at latest db version 47018.
       """
 
-  # This test downgrades to an older WordPress version, but the SQLite plugin requires 6.0+
+  # This test downgrades to an older FinPress version, but the SQLite plugin requires 6.0+
   @require-mysql
   Scenario: Dry run update db on a single site
-    Given a WP install
+    Given a FP install
     And a disable_sidebar_check.php file:
       """
       <?php
-      WP_CLI::add_fp_hook( 'init', static function () {
+      FP_CLI::add_fp_hook( 'init', static function () {
         remove_action( 'after_switch_theme', '_fp_sidebars_changed' );
       } );
       """
@@ -46,7 +46,7 @@ Feature: Update core's database
     Then STDOUT should be:
       """
       Performing a dry run, with no database modification.
-      Success: WordPress database will be upgraded from db version 45805 to 47018.
+      Success: FinPress database will be upgraded from db version 45805 to 47018.
       """
 
     When I run `fp option get db_version`
@@ -55,14 +55,14 @@ Feature: Update core's database
       45805
       """
 
-  # This test downgrades to an older WordPress version, but the SQLite plugin requires 6.0+
+  # This test downgrades to an older FinPress version, but the SQLite plugin requires 6.0+
   @require-mysql
   Scenario: Update db across network
-    Given a WP multisite install
+    Given a FP multisite install
     And a disable_sidebar_check.php file:
       """
       <?php
-      WP_CLI::add_fp_hook( 'init', static function () {
+      FP_CLI::add_fp_hook( 'init', static function () {
         remove_action( 'after_switch_theme', '_fp_sidebars_changed' );
       } );
       """
@@ -88,7 +88,7 @@ Feature: Update core's database
     When I run `fp core update-db --network`
     Then STDOUT should contain:
       """
-      Success: WordPress database upgraded on 3/3 sites.
+      Success: FinPress database upgraded on 3/3 sites.
       """
 
     When I run `fp site option get fpmu_upgrade_site`
@@ -97,14 +97,14 @@ Feature: Update core's database
       {UPDATE_VERSION}
       """
 
-  # This test downgrades to an older WordPress version, but the SQLite plugin requires 6.0+
+  # This test downgrades to an older FinPress version, but the SQLite plugin requires 6.0+
   @require-mysql
   Scenario: Update db across network, dry run
-    Given a WP multisite install
+    Given a FP multisite install
     And a disable_sidebar_check.php file:
       """
       <?php
-      WP_CLI::add_fp_hook( 'init', static function () {
+      FP_CLI::add_fp_hook( 'init', static function () {
         remove_action( 'after_switch_theme', '_fp_sidebars_changed' );
       } );
       """
@@ -134,15 +134,15 @@ Feature: Update core's database
       """
     And STDOUT should contain:
       """
-      WordPress database will be upgraded from db version
+      FinPress database will be upgraded from db version
       """
     And STDOUT should not contain:
       """
-      WordPress database upgraded successfully from db version
+      FinPress database upgraded successfully from db version
       """
     And STDOUT should contain:
       """
-      Success: WordPress database upgraded on 3/3 sites.
+      Success: FinPress database upgraded on 3/3 sites.
       """
 
     When I run `fp site option get fpmu_upgrade_site`
@@ -151,18 +151,18 @@ Feature: Update core's database
       {UPDATE_VERSION}
       """
 
-  Scenario: Ensure update-db sets WP_INSTALLING constant
-    Given a WP install
+  Scenario: Ensure update-db sets FP_INSTALLING constant
+    Given a FP install
     And a before.php file:
       """
       <?php
-      WP_CLI::add_hook( 'before_invoke:core update-db', function(){
-        WP_CLI::log( 'WP_INSTALLING: ' . var_export( WP_INSTALLING, true ) );
+      FP_CLI::add_hook( 'before_invoke:core update-db', function(){
+        FP_CLI::log( 'FP_INSTALLING: ' . var_export( FP_INSTALLING, true ) );
       });
       """
 
     When I run `fp --require=before.php core update-db`
     Then STDOUT should contain:
       """
-      WP_INSTALLING: true
+      FP_INSTALLING: true
       """

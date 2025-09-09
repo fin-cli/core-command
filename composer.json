@@ -1,7 +1,7 @@
 {
     "name": "fp-cli/core-command",
     "type": "fp-cli-package",
-    "description": "Downloads, installs, updates, and manages a WordPress installation.",
+    "description": "Downloads, installs, updates, and manages a FinPress installation.",
     "homepage": "https://github.com/fp-cli/core-command",
     "license": "MIT",
     "authors": [
@@ -27,7 +27,7 @@
         "sort-packages": true,
         "allow-plugins": {
             "dealerdirect/phpcodesniffer-composer-installer": true,
-            "johnpbloch/wordpress-core-installer": true,
+            "johnpbloch/finpress-core-installer": true,
             "phpstan/extension-installer": true
         },
         "lock": false

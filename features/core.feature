@@ -1,11 +1,11 @@
-Feature: Manage WordPress installation
+Feature: Manage FinPress installation
 
   # `fp db create` does not yet work on SQLite,
   # See https://github.com/fp-cli/db-command/issues/234
   @require-mysql
   Scenario: Database doesn't exist
     Given an empty directory
-    And WP files
+    And FP files
     And fp-config.php
 
     When I try `fp core is-installed`
@@ -17,7 +17,7 @@ Feature: Manage WordPress installation
 
   Scenario: Database tables not installed
     Given an empty directory
-    And WP files
+    And FP files
     And fp-config.php
     And a database
 
@@ -46,9 +46,9 @@ Feature: Manage WordPress installation
     When I try `fp core is-installed --network`
     Then the return code should be 1
 
-  Scenario: Install WordPress by prompting
+  Scenario: Install FinPress by prompting
     Given an empty directory
-    And WP files
+    And FP files
     And fp-config.php
     And a database
     And a session file:
@@ -69,9 +69,9 @@ Feature: Manage WordPress installation
       https://localhost:8001
       """
 
-  Scenario: Install WordPress by prompting for the admin email and password
+  Scenario: Install FinPress by prompting for the admin email and password
     Given an empty directory
-    And WP files
+    And FP files
     And fp-config.php
     And a database
     And a session file:
@@ -89,9 +89,9 @@ Feature: Manage WordPress installation
       http://localhost:8001
       """
 
-  Scenario: Install WordPress with an https scheme
+  Scenario: Install FinPress with an https scheme
     Given an empty directory
-    And WP files
+    And FP files
     And fp-config.php
     And a database
 
@@ -104,9 +104,9 @@ Feature: Manage WordPress installation
       https://localhost
       """
 
-  Scenario: Install WordPress with an https scheme and non-standard port
+  Scenario: Install FinPress with an https scheme and non-standard port
     Given an empty directory
-    And WP files
+    And FP files
     And fp-config.php
     And a database
 
@@ -120,7 +120,7 @@ Feature: Manage WordPress installation
       """
 
   Scenario: Full install
-    Given a WP install
+    Given a FP install
 
     When I run `fp core is-installed`
     Then STDOUT should be empty
@@ -143,7 +143,7 @@ Feature: Manage WordPress installation
     Then the return code should be 0
 
   Scenario: Convert install to multisite
-    Given a WP install
+    Given a FP install
 
     When I run `fp eval 'var_export( is_multisite() );'`
     Then STDOUT should be:
@@ -183,7 +183,7 @@ Feature: Manage WordPress installation
 
   Scenario: Install multisite from scratch
     Given an empty directory
-    And WP files
+    And FP files
     And fp-config.php
     And a database
 
@@ -217,15 +217,15 @@ Feature: Manage WordPress installation
   # See https://github.com/fp-cli/db-command/issues/234
   @require-mysql
   Scenario: Install multisite from scratch, with MULTISITE already set in fp-config.php
-    Given a WP multisite install
+    Given a FP multisite install
     And I run `fp db reset --yes`
 
     When I try `fp core is-installed`
     Then the return code should be 1
-    # WP will produce fpdb database errors in `get_sites()` on loading if the WP tables don't exist
+    # FP will produce fpdb database errors in `get_sites()` on loading if the FP tables don't exist
     And STDERR should contain:
       """
-      WordPress database error Table
+      FinPress database error Table
       """
 
     When I run `fp core multisite-install --title=Test --admin_user=fpcli --admin_email=admin@example.com --admin_password=1`
@@ -239,7 +239,7 @@ Feature: Manage WordPress installation
 
   Scenario: Install multisite with subdomains on localhost
     Given an empty directory
-    And WP files
+    And FP files
     And fp-config.php
     And a database
 
@@ -253,7 +253,7 @@ Feature: Manage WordPress installation
   # SQLite compat blocked by https://github.com/fp-cli/fp-cli-tests/pull/188.
   @require-mysql
   Scenario: Custom fp-content directory
-    Given a WP install
+    Given a FP install
     And a custom fp-content directory
 
     When I run `fp plugin status akismet`
@@ -261,7 +261,7 @@ Feature: Manage WordPress installation
 
   Scenario: User defined in fp-cli.yml
     Given an empty directory
-    And WP files
+    And FP files
     And fp-config.php
     And a database
     And a fp-cli.yml file:
@@ -279,7 +279,7 @@ Feature: Manage WordPress installation
       """
 
   Scenario: Test output in a multisite install with custom base path
-    Given a WP install
+    Given a FP install
 
     When I run `fp core multisite-convert --title=Test --base=/test/`
     And I run `fp post list`
@@ -288,37 +288,37 @@ Feature: Manage WordPress installation
       Hello world!
       """
 
-  Scenario: Download WordPress
+  Scenario: Download FinPress
     Given an empty directory
 
     When I run `fp core download`
     Then STDOUT should contain:
       """
-      Success: WordPress downloaded.
+      Success: FinPress downloaded.
       """
     And the fp-settings.php file should exist
 
-  Scenario: Don't download WordPress when files are already present
+  Scenario: Don't download FinPress when files are already present
     Given an empty directory
-    And WP files
+    And FP files
 
     When I try `fp core download`
     Then STDERR should be:
       """
-      Error: WordPress files seem to already be present here.
+      Error: FinPress files seem to already be present here.
       """
     And the return code should be 1
 
   # `fp db create` does not yet work on SQLite,
   # See https://github.com/fp-cli/db-command/issues/234
   @require-php-7.0 @require-mysql
-  Scenario: Install WordPress in a subdirectory
+  Scenario: Install FinPress in a subdirectory
     Given an empty directory
     And a fp-config.php file:
       """
       <?php
       // ** MySQL settings ** //
-      /** The name of the database for WordPress */
+      /** The name of the database for FinPress */
       define('DB_NAME', '{DB_NAME}');
 
       /** MySQL database username */
@@ -340,11 +340,11 @@ Feature: Manage WordPress installation
 
       /* That's all, stop editing! Happy publishing. */
 
-      /** Absolute path to the WordPress directory. */
+      /** Absolute path to the FinPress directory. */
       if ( !defined('ABSPATH') )
           define('ABSPATH', dirname(__FILE__) . '/');
 
-      /** Sets up WordPress vars and included files. */
+      /** Sets up FinPress vars and included files. */
       require_once(ABSPATH . 'fp-settings.php');
       """
     And a fp-cli.yml file:
@@ -358,10 +358,10 @@ Feature: Manage WordPress installation
 
     When I run `fp db create`
     # extra/no-mail.php not present as mu-plugin so skip sending email else will fail on Travis with "sh: 1: -t: not found"
-    And I run `fp core install --url=example.com --title="WP Example" --admin_user=fpcli --admin_password=fpcli --admin_email=fpcli@example.com --skip-email`
+    And I run `fp core install --url=example.com --title="FP Example" --admin_user=fpcli --admin_password=fpcli --admin_email=fpcli@example.com --skip-email`
     Then STDOUT should contain:
       """
-      Success: WordPress installed successfully.
+      Success: FinPress installed successfully.
       """
 
     When I run `fp option get home`
@@ -377,7 +377,7 @@ Feature: Manage WordPress installation
       """
 
   Scenario: Warn when multisite constants can't be inserted into fp-config
-    Given a WP install
+    Given a FP install
     And "That's all" replaced with "C'est tout" in the fp-config.php file
 
     When I try `fp core multisite-convert`
@@ -392,8 +392,8 @@ Feature: Manage WordPress installation
       """
     And the return code should be 0
 
-  Scenario: Convert to WordPress multisite without adding multisite constants to fp-config file
-    Given a WP install
+  Scenario: Convert to FinPress multisite without adding multisite constants to fp-config file
+    Given a FP install
 
     When I run `fp core multisite-convert --skip-config`
     Then STDOUT should contain:
