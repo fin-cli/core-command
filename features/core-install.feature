@@ -1,7 +1,7 @@
 Feature: Install FinPress core
 
   # TODO: Requires investigation for SQLite support.
-  # See https://github.com/fp-cli/core-command/issues/244
+  # See https://github.com/fin-cli/core-command/issues/244
   @require-mysql
   Scenario: Two FinPress installs sharing the same user table won't update existing user
     Given an empty directory
@@ -85,7 +85,7 @@ Feature: Install FinPress core
       """
 
   # TODO: Requires investigation for SQLite support.
-  # See https://github.com/fp-cli/core-command/issues/244
+  # See https://github.com/fin-cli/core-command/issues/244
   @require-mysql
   Scenario: Two FinPress installs sharing the same user table will create new user
     Given an empty directory
@@ -166,7 +166,7 @@ Feature: Install FinPress core
     And a database
 
     # Old versions of FP can generate fpdb database errors if the FP tables don't exist, so STDERR may or may not be empty
-    When I try `fp core install --url=localhost:8001 --title=Test --admin_user=fpcli --admin_email=fpcli@example.org`
+    When I try `fp core install --url=localhost:8001 --title=Test --admin_user=fincli --admin_email=fincli@example.org`
     Then STDOUT should contain:
       """
       Admin password:
@@ -271,7 +271,7 @@ Feature: Install FinPress core
     And a database
 
     # Old versions of FP can generate fpdb database errors if the FP tables don't exist, so STDERR may or may not be empty
-    When I try `fp core multisite-install --url=foobar.org --title=Test --admin_user=fpcli --admin_email=admin@example.com`
+    When I try `fp core multisite-install --url=foobar.org --title=Test --admin_user=fincli --admin_email=admin@example.com`
     Then STDOUT should contain:
       """
       Admin password:
@@ -288,7 +288,7 @@ Feature: Install FinPress core
     And fp-config.php
     And a database
 
-    When I run `fp core multisite-install --url=foobar.org --title=Test --admin_user=fpcli --admin_email=admin@example.com --admin_password=password --skip-config`
+    When I run `fp core multisite-install --url=foobar.org --title=Test --admin_user=fincli --admin_email=admin@example.com --admin_password=password --skip-config`
     Then STDOUT should contain:
       """
       Addition of multisite constants to 'fp-config.php' skipped. You need to add them manually:
@@ -317,7 +317,7 @@ Feature: Install FinPress core
       Success: Generated 'fp-config.php' file.
       """
 
-    When I run `fp core multisite-install --url=foobar.org --title=Test --admin_user=fpcli --admin_email=admin@example.com --admin_password=password --skip-config`
+    When I run `fp core multisite-install --url=foobar.org --title=Test --admin_user=fincli --admin_email=admin@example.com --admin_password=password --skip-config`
     Then STDOUT should be:
       """
       Created single site database tables.

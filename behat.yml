@@ -2,6 +2,6 @@ default:
   suites:
     default:
       contexts:
-        - FP_CLI\Tests\Context\FeatureContext
+        - FIN_CLI\Tests\Context\FeatureContext
       paths:
         - features

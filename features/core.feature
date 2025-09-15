@@ -1,7 +1,7 @@
 Feature: Manage FinPress installation
 
   # `fp db create` does not yet work on SQLite,
-  # See https://github.com/fp-cli/db-command/issues/234
+  # See https://github.com/fin-cli/db-command/issues/234
   @require-mysql
   Scenario: Database doesn't exist
     Given an empty directory
@@ -34,7 +34,7 @@ Feature: Manage FinPress installation
       missing --url parameter (The address of the new site.)
       """
 
-    When I run `fp core install --url='localhost:8001' --title='Test' --admin_user=fpcli --admin_email=admin@example.com --admin_password=1`
+    When I run `fp core install --url='localhost:8001' --title='Test' --admin_user=fincli --admin_email=admin@example.com --admin_password=1`
     Then STDOUT should not be empty
 
     When I run `fp eval 'echo home_url();'`
@@ -55,8 +55,8 @@ Feature: Manage FinPress installation
       """
       localhost:8001
       Test
-      fpcli
-      fpcli
+      fincli
+      fincli
       admin@example.com
       """
 
@@ -76,11 +76,11 @@ Feature: Manage FinPress installation
     And a database
     And a session file:
       """
-      fpcli
+      fincli
       admin@example.com
       """
 
-    When I run `fp core install --url=localhost:8001 --title=Test --admin_user=fpcli --prompt=admin_password,admin_email < session`
+    When I run `fp core install --url=localhost:8001 --title=Test --admin_user=fincli --prompt=admin_password,admin_email < session`
     Then STDOUT should not be empty
 
     When I run `fp eval 'echo home_url();'`
@@ -95,7 +95,7 @@ Feature: Manage FinPress installation
     And fp-config.php
     And a database
 
-    When I run `fp core install --url='https://localhost' --title='Test' --admin_user=fpcli --admin_email=admin@example.com --admin_password=1`
+    When I run `fp core install --url='https://localhost' --title='Test' --admin_user=fincli --admin_email=admin@example.com --admin_password=1`
     Then the return code should be 0
 
     When I run `fp eval 'echo home_url();'`
@@ -110,7 +110,7 @@ Feature: Manage FinPress installation
     And fp-config.php
     And a database
 
-    When I run `fp core install --url='https://localhost:8443' --title='Test' --admin_user=fpcli --admin_email=admin@example.com --admin_password=1`
+    When I run `fp core install --url='https://localhost:8443' --title='Test' --admin_user=fincli --admin_email=admin@example.com --admin_password=1`
     Then the return code should be 0
 
     When I run `fp eval 'echo home_url();'`
@@ -139,7 +139,7 @@ Feature: Manage FinPress installation
       """
 
     # Can complain that it's already installed, but don't exit with an error code
-    When I try `fp core install --url='localhost:8001' --title='Test' --admin_user=fpcli --admin_email=admin@example.com --admin_password=1`
+    When I try `fp core install --url='localhost:8001' --title='Test' --admin_user=fincli --admin_email=admin@example.com --admin_password=1`
     Then the return code should be 0
 
   Scenario: Convert install to multisite
@@ -187,7 +187,7 @@ Feature: Manage FinPress installation
     And fp-config.php
     And a database
 
-    When I run `fp core multisite-install --url=foobar.org --title=Test --admin_user=fpcli --admin_email=admin@example.com --admin_password=1`
+    When I run `fp core multisite-install --url=foobar.org --title=Test --admin_user=fincli --admin_email=admin@example.com --admin_password=1`
     Then STDOUT should be:
       """
       Created single site database tables.
@@ -204,7 +204,7 @@ Feature: Manage FinPress installation
       """
 
     # Can complain that it's already installed, but don't exit with an error code
-    When I try `fp core multisite-install --url=foobar.org --title=Test --admin_user=fpcli --admin_email=admin@example.com --admin_password=1`
+    When I try `fp core multisite-install --url=foobar.org --title=Test --admin_user=fincli --admin_email=admin@example.com --admin_password=1`
     Then the return code should be 0
 
     When I run `fp network meta get 1 upload_space_check_disabled`
@@ -214,7 +214,7 @@ Feature: Manage FinPress installation
       """
 
   # `fp db reset` does not yet work on SQLite,
-  # See https://github.com/fp-cli/db-command/issues/234
+  # See https://github.com/fin-cli/db-command/issues/234
   @require-mysql
   Scenario: Install multisite from scratch, with MULTISITE already set in fp-config.php
     Given a FP multisite install
@@ -228,7 +228,7 @@ Feature: Manage FinPress installation
       FinPress database error Table
       """
 
-    When I run `fp core multisite-install --title=Test --admin_user=fpcli --admin_email=admin@example.com --admin_password=1`
+    When I run `fp core multisite-install --title=Test --admin_user=fincli --admin_email=admin@example.com --admin_password=1`
     Then STDOUT should not be empty
 
     When I run `fp eval 'echo $GLOBALS["current_site"]->domain;'`
@@ -243,14 +243,14 @@ Feature: Manage FinPress installation
     And fp-config.php
     And a database
 
-    When I try `fp core multisite-install --url=http://localhost/ --title=Test --admin_user=fpcli --admin_email=admin@example.com --admin_password=1 --subdomains`
+    When I try `fp core multisite-install --url=http://localhost/ --title=Test --admin_user=fincli --admin_email=admin@example.com --admin_password=1 --subdomains`
     Then STDERR should contain:
       """
       Error: Multisite with subdomains cannot be configured when domain is 'localhost'.
       """
     And the return code should be 1
 
-  # SQLite compat blocked by https://github.com/fp-cli/fp-cli-tests/pull/188.
+  # SQLite compat blocked by https://github.com/fin-cli/fin-cli-tests/pull/188.
   @require-mysql
   Scenario: Custom fp-content directory
     Given a FP install
@@ -259,17 +259,17 @@ Feature: Manage FinPress installation
     When I run `fp plugin status akismet`
     Then STDOUT should not be empty
 
-  Scenario: User defined in fp-cli.yml
+  Scenario: User defined in fin-cli.yml
     Given an empty directory
     And FP files
     And fp-config.php
     And a database
-    And a fp-cli.yml file:
+    And a fin-cli.yml file:
       """
-      user: fpcli
+      user: fincli
       """
 
-    When I run `fp core install --url='localhost:8001' --title='Test' --admin_user=fpcli --admin_email=admin@example.com --admin_password=1`
+    When I run `fp core install --url='localhost:8001' --title='Test' --admin_user=fincli --admin_email=admin@example.com --admin_password=1`
     Then STDOUT should not be empty
 
     When I run `fp eval 'echo home_url();'`
@@ -310,7 +310,7 @@ Feature: Manage FinPress installation
     And the return code should be 1
 
   # `fp db create` does not yet work on SQLite,
-  # See https://github.com/fp-cli/db-command/issues/234
+  # See https://github.com/fin-cli/db-command/issues/234
   @require-php-7.0 @require-mysql
   Scenario: Install FinPress in a subdirectory
     Given an empty directory
@@ -347,7 +347,7 @@ Feature: Manage FinPress installation
       /** Sets up FinPress vars and included files. */
       require_once(ABSPATH . 'fp-settings.php');
       """
-    And a fp-cli.yml file:
+    And a fin-cli.yml file:
       """
       path: fp
       """
@@ -358,7 +358,7 @@ Feature: Manage FinPress installation
 
     When I run `fp db create`
     # extra/no-mail.php not present as mu-plugin so skip sending email else will fail on Travis with "sh: 1: -t: not found"
-    And I run `fp core install --url=example.com --title="FP Example" --admin_user=fpcli --admin_password=fpcli --admin_email=fpcli@example.com --skip-email`
+    And I run `fp core install --url=example.com --title="FP Example" --admin_user=fincli --admin_password=fincli --admin_email=fincli@example.com --skip-email`
     Then STDOUT should contain:
       """
       Success: FinPress installed successfully.

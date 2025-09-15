@@ -7,7 +7,7 @@ Feature: Update core's database
     And a disable_sidebar_check.php file:
       """
       <?php
-      FP_CLI::add_fp_hook( 'init', static function () {
+      FIN_CLI::add_fp_hook( 'init', static function () {
         remove_action( 'after_switch_theme', '_fp_sidebars_changed' );
       } );
       """
@@ -34,7 +34,7 @@ Feature: Update core's database
     And a disable_sidebar_check.php file:
       """
       <?php
-      FP_CLI::add_fp_hook( 'init', static function () {
+      FIN_CLI::add_fp_hook( 'init', static function () {
         remove_action( 'after_switch_theme', '_fp_sidebars_changed' );
       } );
       """
@@ -62,7 +62,7 @@ Feature: Update core's database
     And a disable_sidebar_check.php file:
       """
       <?php
-      FP_CLI::add_fp_hook( 'init', static function () {
+      FIN_CLI::add_fp_hook( 'init', static function () {
         remove_action( 'after_switch_theme', '_fp_sidebars_changed' );
       } );
       """
@@ -104,7 +104,7 @@ Feature: Update core's database
     And a disable_sidebar_check.php file:
       """
       <?php
-      FP_CLI::add_fp_hook( 'init', static function () {
+      FIN_CLI::add_fp_hook( 'init', static function () {
         remove_action( 'after_switch_theme', '_fp_sidebars_changed' );
       } );
       """
@@ -156,8 +156,8 @@ Feature: Update core's database
     And a before.php file:
       """
       <?php
-      FP_CLI::add_hook( 'before_invoke:core update-db', function(){
-        FP_CLI::log( 'FP_INSTALLING: ' . var_export( FP_INSTALLING, true ) );
+      FIN_CLI::add_hook( 'before_invoke:core update-db', function(){
+        FIN_CLI::log( 'FP_INSTALLING: ' . var_export( FP_INSTALLING, true ) );
       });
       """
 

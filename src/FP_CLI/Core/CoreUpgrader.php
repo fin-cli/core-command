@@ -1,10 +1,10 @@
 <?php
 
-namespace FP_CLI\Core;
+namespace FIN_CLI\Core;
 
 use Exception;
-use FP_CLI;
-use FP_CLI\Utils;
+use FIN_CLI;
+use FIN_CLI\Utils;
 use FP_Error;
 use Core_Upgrader as DefaultCoreUpgrader;
 use FP_Filesystem_Base;
@@ -12,7 +12,7 @@ use FP_Filesystem_Base;
 /**
  * A Core Upgrader class that caches the download, and uses cached if available.
  *
- * @package fp-cli
+ * @package fin-cli
  */
 class CoreUpgrader extends DefaultCoreUpgrader {
 
@@ -96,8 +96,8 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 			}
 		);
 
-		$cache     = FP_CLI::get_cache();
-		$update    = $GLOBALS['fpcli_core_update_obj'];
+		$cache     = FIN_CLI::get_cache();
+		$update    = $GLOBALS['fincli_core_update_obj'];
 		$cache_key = "core/{$filename}-{$update->locale}.{$extension}";
 
 		/**
@@ -107,7 +107,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 
 		if ( $cache_file && false === stripos( $package, 'https://finpress.org/nightly-builds/' )
 			&& false === stripos( $package, 'http://finpress.org/nightly-builds/' ) ) {
-			FP_CLI::log( "Using cached file '{$cache_file}'..." );
+			FIN_CLI::log( "Using cached file '{$cache_file}'..." );
 			copy( $cache_file, $temp );
 			return $temp;
 		}

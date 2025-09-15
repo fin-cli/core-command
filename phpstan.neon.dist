@@ -4,7 +4,7 @@ parameters:
     - src
     - core-command.php
   scanDirectories:
-    - vendor/fp-cli/fp-cli/php
+    - vendor/fin-cli/fin-cli/php
   scanFiles:
     - vendor/php-stubs/finpress-stubs/finpress-stubs.php
   treatPhpDocTypesAsCertain: false

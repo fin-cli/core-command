@@ -1,11 +1,11 @@
 <?php
 
-namespace FP_CLI\Core;
+namespace FIN_CLI\Core;
 
 /**
  * A Core Upgrader class that leaves packages intact by default.
  *
- * @package fp-cli
+ * @package fin-cli
  */
 class NonDestructiveCoreUpgrader extends CoreUpgrader {
 	// phpcs:ignore Generic.CodeAnalysis.UselessOverridingMethod.Found -- Provide default value.

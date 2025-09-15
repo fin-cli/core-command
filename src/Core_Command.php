@@ -1,11 +1,11 @@
 <?php
 
 use Composer\Semver\Comparator;
-use FP_CLI\Extractor;
-use FP_CLI\Iterators\Table as TableIterator;
-use FP_CLI\Utils;
-use FP_CLI\Formatter;
-use FP_CLI\FpOrgApi;
+use FIN_CLI\Extractor;
+use FIN_CLI\Iterators\Table as TableIterator;
+use FIN_CLI\Utils;
+use FIN_CLI\Formatter;
+use FIN_CLI\FpOrgApi;
 
 /**
  * Downloads, installs, updates, and manages a FinPress installation.
@@ -26,9 +26,9 @@ use FP_CLI\FpOrgApi;
  *     $ fp core version
  *     4.5.2
  *
- * @package fp-cli
+ * @package fin-cli
  */
-class Core_Command extends FP_CLI_Command {
+class Core_Command extends FIN_CLI_Command {
 
 	/**
 	 * Checks for FinPress updates via Version Check API.
@@ -92,7 +92,7 @@ class Core_Command extends FP_CLI_Command {
 			);
 			$formatter->display_items( $updates );
 		} else {
-			FP_CLI::success( 'FinPress is at the latest version.' );
+			FIN_CLI::success( 'FinPress is at the latest version.' );
 		}
 	}
 
@@ -158,27 +158,27 @@ class Core_Command extends FP_CLI_Command {
 			|| is_readable( $download_dir . 'fp-links-opml.php' );
 
 		if ( $finpress_present && ! Utils\get_flag_value( $assoc_args, 'force' ) ) {
-			FP_CLI::error( 'FinPress files seem to already be present here.' );
+			FIN_CLI::error( 'FinPress files seem to already be present here.' );
 		}
 
 		if ( ! is_dir( $download_dir ) ) {
 			if ( ! is_writable( dirname( $download_dir ) ) ) {
-				FP_CLI::error( "Insufficient permission to create directory '{$download_dir}'." );
+				FIN_CLI::error( "Insufficient permission to create directory '{$download_dir}'." );
 			}
 
-			FP_CLI::log( "Creating directory '{$download_dir}'." );
+			FIN_CLI::log( "Creating directory '{$download_dir}'." );
 			if ( ! @mkdir( $download_dir, 0777, true /*recursive*/ ) ) {
 				$error = error_get_last();
 				if ( $error ) {
-					FP_CLI::error( "Failed to create directory '{$download_dir}': {$error['message']}." );
+					FIN_CLI::error( "Failed to create directory '{$download_dir}': {$error['message']}." );
 				} else {
-					FP_CLI::error( "Failed to create directory '{$download_dir}'." );
+					FIN_CLI::error( "Failed to create directory '{$download_dir}'." );
 				}
 			}
 		}
 
 		if ( ! is_writable( $download_dir ) ) {
-			FP_CLI::error( "'{$download_dir}' is not writable by current user." );
+			FIN_CLI::error( "'{$download_dir}' is not writable by current user." );
 		}
 
 		$locale       = Utils\get_flag_value( $assoc_args, 'locale', 'en_US' );
@@ -187,7 +187,7 @@ class Core_Command extends FP_CLI_Command {
 		$extract      = Utils\get_flag_value( $assoc_args, 'extract', true );
 
 		if ( $skip_content && ! $extract ) {
-			FP_CLI::error( 'Cannot use both --skip-content and --no-extract at the same time.' );
+			FIN_CLI::error( 'Cannot use both --skip-content and --no-extract at the same time.' );
 		}
 
 		$download_url = array_shift( $args );
@@ -196,10 +196,10 @@ class Core_Command extends FP_CLI_Command {
 		if ( $from_url ) {
 			$version = null;
 			if ( isset( $assoc_args['version'] ) ) {
-				FP_CLI::error( 'Version option is not available for URL downloads.' );
+				FIN_CLI::error( 'Version option is not available for URL downloads.' );
 			}
 			if ( $skip_content || 'en_US' !== $locale ) {
-				FP_CLI::error( 'Skip content and locale options are not available for URL downloads.' );
+				FIN_CLI::error( 'Skip content and locale options are not available for URL downloads.' );
 			}
 		} elseif ( isset( $assoc_args['version'] ) && 'latest' !== $assoc_args['version'] ) {
 			$version = $assoc_args['version'];
@@ -218,10 +218,10 @@ class Core_Command extends FP_CLI_Command {
 				$offer = ( new FpOrgApi( [ 'insecure' => $insecure ] ) )
 					->get_core_download_offer( $locale );
 			} catch ( Exception $exception ) {
-				FP_CLI::error( $exception );
+				FIN_CLI::error( $exception );
 			}
 			if ( ! $offer ) {
-				FP_CLI::error( "The requested locale ({$locale}) was not found." );
+				FIN_CLI::error( "The requested locale ({$locale}) was not found." );
 			}
 			$version      = $offer['current'];
 			$download_url = $offer['download'];
@@ -231,7 +231,7 @@ class Core_Command extends FP_CLI_Command {
 		}
 
 		if ( 'nightly' === $version && 'en_US' !== $locale ) {
-			FP_CLI::error( 'Nightly builds are only available for the en_US locale.' );
+			FIN_CLI::error( 'Nightly builds are only available for the en_US locale.' );
 		}
 
 		$from_version = '';
@@ -241,9 +241,9 @@ class Core_Command extends FP_CLI_Command {
 		}
 
 		if ( $from_url ) {
-			FP_CLI::log( "Downloading from {$download_url} ..." );
+			FIN_CLI::log( "Downloading from {$download_url} ..." );
 		} else {
-			FP_CLI::log( "Downloading FinPress {$version} ({$locale})..." );
+			FIN_CLI::log( "Downloading FinPress {$version} ({$locale})..." );
 		}
 
 		$path_parts = pathinfo( $download_url );
@@ -251,15 +251,15 @@ class Core_Command extends FP_CLI_Command {
 		if ( isset( $path_parts['extension'] ) && 'zip' === $path_parts['extension'] ) {
 			$extension = 'zip';
 			if ( $extract && ! class_exists( 'ZipArchive' ) ) {
-				FP_CLI::error( 'Extracting a zip file requires ZipArchive.' );
+				FIN_CLI::error( 'Extracting a zip file requires ZipArchive.' );
 			}
 		}
 
 		if ( $skip_content && 'zip' !== $extension ) {
-			FP_CLI::error( 'Skip content is only available for ZIP files.' );
+			FIN_CLI::error( 'Skip content is only available for ZIP files.' );
 		}
 
-		$cache = FP_CLI::get_cache();
+		$cache = FIN_CLI::get_cache();
 		if ( $from_url ) {
 			$cache_file = null;
 		} else {
@@ -270,13 +270,13 @@ class Core_Command extends FP_CLI_Command {
 		$bad_cache = false;
 
 		if ( is_string( $cache_file ) ) {
-			FP_CLI::log( "Using cached file '{$cache_file}'..." );
+			FIN_CLI::log( "Using cached file '{$cache_file}'..." );
 			$skip_content_cache_file = $skip_content ? self::strip_content_dir( $cache_file ) : null;
 			if ( $extract ) {
 				try {
 					Extractor::extract( $skip_content_cache_file ?: $cache_file, $download_dir );
 				} catch ( Exception $exception ) {
-					FP_CLI::warning( 'Extraction failed, downloading a new copy...' );
+					FIN_CLI::warning( 'Extraction failed, downloading a new copy...' );
 					$bad_cache = true;
 				}
 			} else {
@@ -307,9 +307,9 @@ class Core_Command extends FP_CLI_Command {
 			$response = Utils\http_request( 'GET', $download_url, null, $headers, $options );
 
 			if ( 404 === (int) $response->status_code ) {
-				FP_CLI::error( 'Release not found. Double-check locale or version.' );
+				FIN_CLI::error( 'Release not found. Double-check locale or version.' );
 			} elseif ( 20 !== (int) substr( (string) $response->status_code, 0, 2 ) ) {
-				FP_CLI::error( "Couldn't access download URL (HTTP code {$response->status_code})." );
+				FIN_CLI::error( "Couldn't access download URL (HTTP code {$response->status_code})." );
 			}
 
 			if ( 'nightly' !== $version ) {
@@ -320,15 +320,15 @@ class Core_Command extends FP_CLI_Command {
 					$md5_file = md5_file( $temp );
 
 					if ( $md5_file === $md5_response->body ) {
-						FP_CLI::log( 'md5 hash verified: ' . $md5_file );
+						FIN_CLI::log( 'md5 hash verified: ' . $md5_file );
 					} else {
-						FP_CLI::error( "md5 hash for download ({$md5_file}) is different than the release hash ({$md5_response->body})." );
+						FIN_CLI::error( "md5 hash for download ({$md5_file}) is different than the release hash ({$md5_response->body})." );
 					}
 				} else {
-					FP_CLI::warning( "Couldn't access md5 hash for release ({$download_url}.md5, HTTP code {$md5_response->status_code})." );
+					FIN_CLI::warning( "Couldn't access md5 hash for release ({$download_url}.md5, HTTP code {$md5_response->status_code})." );
 				}
 			} else {
-				FP_CLI::warning( 'md5 hash checks are not available for nightly downloads.' );
+				FIN_CLI::warning( 'md5 hash checks are not available for nightly downloads.' );
 			}
 
 			$skip_content_temp = $skip_content ? self::strip_content_dir( $temp ) : null;
@@ -336,7 +336,7 @@ class Core_Command extends FP_CLI_Command {
 				try {
 					Extractor::extract( $skip_content_temp ?: $temp, $download_dir );
 				} catch ( Exception $exception ) {
-					FP_CLI::error( "Couldn't extract FinPress archive. {$exception->getMessage()}" );
+					FIN_CLI::error( "Couldn't extract FinPress archive. {$exception->getMessage()}" );
 				}
 			} else {
 				copy( $temp, $download_dir . basename( $temp ) );
@@ -353,7 +353,7 @@ class Core_Command extends FP_CLI_Command {
 			$this->cleanup_extra_files( $from_version, $version, $locale, $insecure );
 		}
 
-		FP_CLI::success( 'FinPress downloaded.' );
+		FIN_CLI::success( 'FinPress downloaded.' );
 	}
 
 	/**
@@ -394,10 +394,10 @@ class Core_Command extends FP_CLI_Command {
 	 */
 	public function is_installed( $args, $assoc_args ) {
 		if ( is_blog_installed() && ( ! Utils\get_flag_value( $assoc_args, 'network' ) || is_multisite() ) ) {
-			FP_CLI::halt( 0 );
+			FIN_CLI::halt( 0 );
 		}
 
-		FP_CLI::halt( 1 );
+		FIN_CLI::halt( 1 );
 	}
 
 	/**
@@ -454,9 +454,9 @@ class Core_Command extends FP_CLI_Command {
 	 */
 	public function install( $args, $assoc_args ) {
 		if ( $this->do_install( $assoc_args ) ) {
-			FP_CLI::success( 'FinPress installed successfully.' );
+			FIN_CLI::success( 'FinPress installed successfully.' );
 		} else {
-			FP_CLI::log( 'FinPress is already installed.' );
+			FIN_CLI::log( 'FinPress is already installed.' );
 		}
 	}
 
@@ -504,7 +504,7 @@ class Core_Command extends FP_CLI_Command {
 	 */
 	public function multisite_convert( $args, $assoc_args ) {
 		if ( is_multisite() ) {
-			FP_CLI::error( 'This already is a multisite installation.' );
+			FIN_CLI::error( 'This already is a multisite installation.' );
 		}
 
 		$assoc_args = self::set_multisite_defaults( $assoc_args );
@@ -519,7 +519,7 @@ class Core_Command extends FP_CLI_Command {
 		}
 
 		if ( $this->multisite_convert_( $assoc_args ) ) {
-			FP_CLI::success( "Network installed. Don't forget to set up rewrite rules (and a .htaccess file, if using Apache)." );
+			FIN_CLI::success( "Network installed. Don't forget to set up rewrite rules (and a .htaccess file, if using Apache)." );
 		}
 	}
 
@@ -585,9 +585,9 @@ class Core_Command extends FP_CLI_Command {
 	 */
 	public function multisite_install( $args, $assoc_args ) {
 		if ( $this->do_install( $assoc_args ) ) {
-			FP_CLI::log( 'Created single site database tables.' );
+			FIN_CLI::log( 'Created single site database tables.' );
 		} else {
-			FP_CLI::log( 'Single site database tables already present.' );
+			FIN_CLI::log( 'Single site database tables already present.' );
 		}
 
 		$assoc_args = self::set_multisite_defaults( $assoc_args );
@@ -628,7 +628,7 @@ class Core_Command extends FP_CLI_Command {
 			);
 		}
 
-		FP_CLI::success( "Network installed. Don't forget to set up rewrite rules (and a .htaccess file, if using Apache)." );
+		FIN_CLI::success( "Network installed. Don't forget to set up rewrite rules (and a .htaccess file, if using Apache)." );
 	}
 
 	private static function set_multisite_defaults( $assoc_args ) {
@@ -674,14 +674,14 @@ class Core_Command extends FP_CLI_Command {
 		// Support prompting for the `--url=<url>`,
 		// which is normally a runtime argument
 		if ( isset( $assoc_args['url'] ) ) {
-			FP_CLI::set_url( $assoc_args['url'] );
+			FIN_CLI::set_url( $assoc_args['url'] );
 		}
 
 		$public   = true;
 		$password = $args['admin_password'];
 
 		if ( ! is_email( $args['admin_email'] ) ) {
-			FP_CLI::error( "The '{$args['admin_email']}' email address is invalid." );
+			FIN_CLI::error( "The '{$args['admin_email']}' email address is invalid." );
 		}
 
 		$result = fp_install(
@@ -695,17 +695,17 @@ class Core_Command extends FP_CLI_Command {
 		);
 
 		if ( ! empty( $GLOBALS['fpdb']->last_error ) ) {
-			FP_CLI::error( 'Installation produced database errors, and may have partially or completely failed.' );
+			FIN_CLI::error( 'Installation produced database errors, and may have partially or completely failed.' );
 		}
 
 		if ( empty( $args['admin_password'] ) ) {
-			FP_CLI::log( "Admin password: {$result['password']}" );
+			FIN_CLI::log( "Admin password: {$result['password']}" );
 		}
 
 		// Confirm the uploads directory exists
 		$upload_dir = fp_upload_dir();
 		if ( ! empty( $upload_dir['error'] ) ) {
-			FP_CLI::warning( $upload_dir['error'] );
+			FIN_CLI::warning( $upload_dir['error'] );
 		}
 
 		return true;
@@ -718,7 +718,7 @@ class Core_Command extends FP_CLI_Command {
 
 		$domain = self::get_clean_basedomain();
 		if ( 'localhost' === $domain && ! empty( $assoc_args['subdomains'] ) ) {
-			FP_CLI::error( "Multisite with subdomains cannot be configured when domain is 'localhost'." );
+			FIN_CLI::error( "Multisite with subdomains cannot be configured when domain is 'localhost'." );
 		}
 
 		// need to register the multisite tables manually for some reason
@@ -746,20 +746,20 @@ class Core_Command extends FP_CLI_Command {
 		$site_id = ( null === $site_id ) ? 1 : (int) $site_id;
 
 		if ( true === $result ) {
-			FP_CLI::log( 'Set up multisite database tables.' );
+			FIN_CLI::log( 'Set up multisite database tables.' );
 		} else {
 			switch ( $result->get_error_code() ) {
 
 				case 'siteid_exists':
-					FP_CLI::log( $result->get_error_message() );
+					FIN_CLI::log( $result->get_error_message() );
 					return false;
 
 				case 'no_wildcard_dns':
-					FP_CLI::warning( __( 'Wildcard DNS may not be configured correctly.' ) );
+					FIN_CLI::warning( __( 'Wildcard DNS may not be configured correctly.' ) );
 					break;
 
 				default:
-					FP_CLI::error( $result );
+					FIN_CLI::error( $result );
 			}
 		}
 
@@ -782,11 +782,11 @@ EOT;
 
 			$fp_config_path = Utils\locate_fp_config();
 			if ( true === Utils\get_flag_value( $assoc_args, 'skip-config' ) ) {
-				FP_CLI::log( "Addition of multisite constants to 'fp-config.php' skipped. You need to add them manually:\n{$ms_config}" );
+				FIN_CLI::log( "Addition of multisite constants to 'fp-config.php' skipped. You need to add them manually:\n{$ms_config}" );
 			} elseif ( is_writable( $fp_config_path ) && self::modify_fp_config( $ms_config ) ) {
-				FP_CLI::log( "Added multisite constants to 'fp-config.php'." );
+				FIN_CLI::log( "Added multisite constants to 'fp-config.php'." );
 			} else {
-				FP_CLI::warning( "Multisite constants could not be written to 'fp-config.php'. You may need to add them manually:\n{$ms_config}" );
+				FIN_CLI::warning( "Multisite constants could not be written to 'fp-config.php'. You may need to add them manually:\n{$ms_config}" );
 			}
 		} else {
 			/* Multisite constants are defined, therefore we already have an empty site_admins site meta.
@@ -924,7 +924,7 @@ EOT;
 		$details = self::get_fp_details();
 
 		if ( ! Utils\get_flag_value( $assoc_args, 'extra' ) ) {
-			FP_CLI::line( $details['fp_version'] );
+			FIN_CLI::line( $details['fp_version'] );
 			return;
 		}
 
@@ -961,7 +961,7 @@ EOT;
 		$versions_path = $abspath . 'fp-includes/version.php';
 
 		if ( ! is_readable( $versions_path ) ) {
-			FP_CLI::error(
+			FIN_CLI::error(
 				"This does not seem to be a FinPress installation.\n" .
 				'Pass --path=`path/to/finpress` or run `fp core download`.'
 			);
@@ -987,7 +987,7 @@ EOT;
 		$template_path = "{$command_root}/templates/{$template}";
 
 		if ( ! file_exists( $template_path ) ) {
-			FP_CLI::error( "Couldn't find {$template}" );
+			FIN_CLI::error( "Couldn't find {$template}" );
 		}
 
 		return $template_path;
@@ -1110,7 +1110,7 @@ EOT;
 		global $fp_version;
 
 		$update   = null;
-		$upgrader = 'FP_CLI\\Core\\CoreUpgrader';
+		$upgrader = 'FIN_CLI\\Core\\CoreUpgrader';
 
 		if ( 'trunk' === Utils\get_flag_value( $assoc_args, 'version' ) ) {
 			$assoc_args['version'] = 'nightly';
@@ -1119,7 +1119,7 @@ EOT;
 		if ( ! empty( $args[0] ) ) {
 
 			// ZIP path or URL is given
-			$upgrader = 'FP_CLI\\Core\\NonDestructiveCoreUpgrader';
+			$upgrader = 'FIN_CLI\\Core\\NonDestructiveCoreUpgrader';
 			$version  = Utils\get_flag_value( $assoc_args, 'version' );
 
 			$update = (object) [
@@ -1156,7 +1156,7 @@ EOT;
 					break;
 				}
 				if ( empty( $update ) ) {
-					FP_CLI::success( 'FinPress is at the latest minor release.' );
+					FIN_CLI::success( 'FinPress is at the latest minor release.' );
 					return;
 				}
 			} elseif ( ! empty( $from_api->updates ) ) {
@@ -1199,29 +1199,29 @@ EOT;
 			require_once ABSPATH . 'fp-admin/includes/upgrade.php';
 
 			if ( $update->version ) {
-				FP_CLI::log( "Updating to version {$update->version} ({$update->locale})..." );
+				FIN_CLI::log( "Updating to version {$update->version} ({$update->locale})..." );
 			} else {
-				FP_CLI::log( 'Starting update...' );
+				FIN_CLI::log( 'Starting update...' );
 			}
 
 			$from_version = $fp_version;
 			$insecure     = (bool) Utils\get_flag_value( $assoc_args, 'insecure', false );
 
-			$GLOBALS['fpcli_core_update_obj'] = $update;
+			$GLOBALS['fincli_core_update_obj'] = $update;
 
 			/**
-			 * @var \FP_CLI\Core\CoreUpgrader $fp_upgrader
+			 * @var \FIN_CLI\Core\CoreUpgrader $fp_upgrader
 			 */
 			$fp_upgrader = Utils\get_upgrader( $upgrader, $insecure );
 			$result      = $fp_upgrader->upgrade( $update );
-			unset( $GLOBALS['fpcli_core_update_obj'] );
+			unset( $GLOBALS['fincli_core_update_obj'] );
 
 			if ( is_fp_error( $result ) ) {
-				$message = FP_CLI::error_to_string( $result );
+				$message = FIN_CLI::error_to_string( $result );
 				if ( 'up_to_date' !== $result->get_error_code() ) {
-					FP_CLI::error( $message );
+					FIN_CLI::error( $message );
 				} else {
-					FP_CLI::success( $message );
+					FIN_CLI::success( $message );
 				}
 			} else {
 
@@ -1237,10 +1237,10 @@ EOT;
 				$locale = Utils\get_flag_value( $assoc_args, 'locale', get_locale() );
 				$this->cleanup_extra_files( $from_version, $to_version, $locale, $insecure );
 
-				FP_CLI::success( 'FinPress updated successfully.' );
+				FIN_CLI::success( 'FinPress updated successfully.' );
 			}
 		} else {
-			FP_CLI::success( 'FinPress is up to date.' );
+			FIN_CLI::success( 'FinPress is up to date.' );
 		}
 	}
 
@@ -1276,12 +1276,12 @@ EOT;
 
 		$network = Utils\get_flag_value( $assoc_args, 'network' );
 		if ( $network && ! is_multisite() ) {
-			FP_CLI::error( 'This is not a multisite installation.' );
+			FIN_CLI::error( 'This is not a multisite installation.' );
 		}
 
 		$dry_run = Utils\get_flag_value( $assoc_args, 'dry-run' );
 		if ( $dry_run ) {
-			FP_CLI::log( 'Performing a dry run, with no database modification.' );
+			FIN_CLI::log( 'Performing a dry run, with no database modification.' );
 		}
 
 		if ( $network ) {
@@ -1313,7 +1313,7 @@ EOT;
 				/**
 				 * @var object{stdout: string, stderr: string, return_code: int} $process
 				 */
-				$process = FP_CLI::runcommand(
+				$process = FIN_CLI::runcommand(
 					$cmd,
 					[
 						'return'     => 'all',
@@ -1328,10 +1328,10 @@ EOT;
 					} else {
 						$message = "Database upgraded successfully on {$url}";
 					}
-					FP_CLI::log( $message );
+					FIN_CLI::log( $message );
 					++$success;
 				} else {
-					FP_CLI::warning( "Database failed to upgrade on {$url}" );
+					FIN_CLI::warning( "Database failed to upgrade on {$url}" );
 				}
 			}
 			if ( ! $dry_run && $total && $success === $total ) {
@@ -1339,7 +1339,7 @@ EOT;
 					update_metadata( 'site', $site_id, 'fpmu_upgrade_site', $fp_db_version );
 				}
 			}
-			FP_CLI::success( "FinPress database upgraded on {$success}/{$total} sites." );
+			FIN_CLI::success( "FinPress database upgraded on {$success}/{$total} sites." );
 		} else {
 			require_once ABSPATH . 'fp-admin/includes/upgrade.php';
 
@@ -1353,7 +1353,7 @@ EOT;
 
 			if ( $fp_db_version !== $fp_current_db_version ) {
 				if ( $dry_run ) {
-					FP_CLI::success( "FinPress database will be upgraded from db version {$fp_current_db_version} to {$fp_db_version}." );
+					FIN_CLI::success( "FinPress database will be upgraded from db version {$fp_current_db_version} to {$fp_db_version}." );
 				} else {
 					// FP upgrade isn't too fussy about generating MySQL warnings such as "Duplicate key name" during an upgrade so suppress.
 					$fpdb->suppress_errors();
@@ -1365,10 +1365,10 @@ EOT;
 
 					fp_upgrade();
 
-					FP_CLI::success( "FinPress database upgraded successfully from db version {$fp_current_db_version} to {$fp_db_version}." );
+					FIN_CLI::success( "FinPress database upgraded successfully from db version {$fp_current_db_version} to {$fp_db_version}." );
 				}
 			} else {
-				FP_CLI::success( "FinPress database already at latest db version {$fp_db_version}." );
+				FIN_CLI::success( "FinPress database already at latest db version {$fp_db_version}." );
 			}
 		}
 	}
@@ -1387,7 +1387,7 @@ EOT;
 			if ( 'zip' === $file_type ) {
 				return 'https://finpress.org/nightly-builds/finpress-latest.zip';
 			} else {
-				FP_CLI::error( 'Nightly builds are only available in .zip format.' );
+				FIN_CLI::error( 'Nightly builds are only available in .zip format.' );
 			}
 		}
 
@@ -1476,19 +1476,19 @@ EOT;
 	 */
 	private function cleanup_extra_files( $version_from, $version_to, $locale, $insecure ) {
 		if ( ! $version_from || ! $version_to ) {
-			FP_CLI::warning( 'Failed to find FinPress version. Please cleanup files manually.' );
+			FIN_CLI::warning( 'Failed to find FinPress version. Please cleanup files manually.' );
 			return;
 		}
 
 		$old_checksums = self::get_core_checksums( $version_from, $locale ?: 'en_US', $insecure );
 		if ( ! is_array( $old_checksums ) ) {
-			FP_CLI::warning( "{$old_checksums} Please cleanup files manually." );
+			FIN_CLI::warning( "{$old_checksums} Please cleanup files manually." );
 			return;
 		}
 
 		$new_checksums = self::get_core_checksums( $version_to, $locale ?: 'en_US', $insecure );
 		if ( ! is_array( $new_checksums ) ) {
-			FP_CLI::warning( "{$new_checksums} Please cleanup files manually." );
+			FIN_CLI::warning( "{$new_checksums} Please cleanup files manually." );
 
 			return;
 		}
@@ -1531,7 +1531,7 @@ EOT;
 
 			// On Windows or Unix with only the incorrectly cased file.
 			if ( $new_basename !== $expected_basename ) {
-				FP_CLI::debug( "Renaming file '{$old_filepath_to_check}' => '{$new_filepath}'", 'core' );
+				FIN_CLI::debug( "Renaming file '{$old_filepath_to_check}' => '{$new_filepath}'", 'core' );
 
 				rename( ABSPATH . $old_filepath_to_check, ABSPATH . $old_filepath_to_check . '.tmp' );
 				rename( ABSPATH . $old_filepath_to_check . '.tmp', ABSPATH . $new_filepath );
@@ -1547,7 +1547,7 @@ EOT;
 
 					// Check deeper because even realpath or glob might not return the actual case.
 					if ( ! in_array( $expected_basename, $files, true ) ) {
-						FP_CLI::debug( "Renaming file '{$old_filepath_to_check}' => '{$new_filepath}'", 'core' );
+						FIN_CLI::debug( "Renaming file '{$old_filepath_to_check}' => '{$new_filepath}'", 'core' );
 
 						rename( ABSPATH . $old_filepath_to_check, ABSPATH . $old_filepath_to_check . '.tmp' );
 						rename( ABSPATH . $old_filepath_to_check . '.tmp', ABSPATH . $new_filepath );
@@ -1560,7 +1560,7 @@ EOT;
 		}
 
 		if ( ! empty( $files_to_remove ) ) {
-			FP_CLI::log( 'Cleaning up files...' );
+			FIN_CLI::log( 'Cleaning up files...' );
 
 			$count = 0;
 			foreach ( $files_to_remove as $file ) {
@@ -1572,15 +1572,15 @@ EOT;
 
 				if ( file_exists( ABSPATH . $file ) ) {
 					unlink( ABSPATH . $file );
-					FP_CLI::log( "File removed: {$file}" );
+					FIN_CLI::log( "File removed: {$file}" );
 					++$count;
 				}
 			}
 
 			if ( $count ) {
-				FP_CLI::log( number_format( $count ) . ' files cleaned up.' );
+				FIN_CLI::log( number_format( $count ) . ' files cleaned up.' );
 			} else {
-				FP_CLI::log( 'No files found that need cleaning up.' );
+				FIN_CLI::log( 'No files found that need cleaning up.' );
 			}
 		}
 	}
@@ -1596,7 +1596,7 @@ EOT;
 		);
 		// Duplicate file to avoid modifying the original, which could be cache.
 		if ( ! copy( $zip_file, $new_zip_file ) ) {
-			FP_CLI::error( 'Failed to copy ZIP file.' );
+			FIN_CLI::error( 'Failed to copy ZIP file.' );
 		}
 		$zip = new ZipArchive();
 		$res = $zip->open( $new_zip_file );
@@ -1630,7 +1630,7 @@ EOT;
 			$zip->close();
 			return $new_zip_file;
 		} else {
-			FP_CLI::error( 'ZipArchive failed to open ZIP file.' );
+			FIN_CLI::error( 'ZipArchive failed to open ZIP file.' );
 		}
 	}
 }

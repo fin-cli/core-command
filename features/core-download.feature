@@ -28,7 +28,7 @@ Feature: Download FinPress
       """
     And the return code should be 1
 
-    When I try `FP_CLI_STRICT_ARGS_MODE=1 fp core download --path=inner`
+    When I try `FIN_CLI_STRICT_ARGS_MODE=1 fp core download --path=inner`
     Then STDERR should be:
       """
       Error: FinPress files seem to already be present here.
@@ -91,12 +91,12 @@ Feature: Download FinPress
     And a download-command.php file:
       """
       <?php
-      class Download_Command extends FP_CLI_Command {
+      class Download_Command extends FIN_CLI_Command {
           public function __invoke() {
-              FP_CLI::run_command( array( 'core', 'download' ), array( 'path' => 'src/' ) );
+              FIN_CLI::run_command( array( 'core', 'download' ), array( 'path' => 'src/' ) );
           }
       }
-      FP_CLI::add_command( 'custom-download', 'Download_Command' );
+      FIN_CLI::add_command( 'custom-download', 'Download_Command' );
       """
 
     When I run `fp --require=download-command.php custom-download`
@@ -296,7 +296,7 @@ Feature: Download FinPress
       """
     And the return code should be 1
 
-    When I try `FP_CLI_STRICT_ARGS_MODE=1 fp core download --path=non-directory-path`
+    When I try `FIN_CLI_STRICT_ARGS_MODE=1 fp core download --path=non-directory-path`
     Then STDERR should contain:
       """
       Failed to create directory
@@ -307,7 +307,7 @@ Feature: Download FinPress
       """
     And the return code should be 1
 
-    When I try `FP_CLI_STRICT_ARGS_MODE=1 fp core download --path=non-directory-path\\`
+    When I try `FIN_CLI_STRICT_ARGS_MODE=1 fp core download --path=non-directory-path\\`
     Then STDERR should contain:
       """
       Failed to create directory
@@ -329,7 +329,7 @@ Feature: Download FinPress
       """
     And the return code should be 1
 
-    When I try `FP_CLI_STRICT_ARGS_MODE=1 fp core download --path=/root-level-directory`
+    When I try `FIN_CLI_STRICT_ARGS_MODE=1 fp core download --path=/root-level-directory`
     Then STDERR should contain:
       """
       Insufficient permission to create directory

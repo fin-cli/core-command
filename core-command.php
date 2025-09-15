@@ -1,12 +1,12 @@
 <?php
 
-if ( ! class_exists( 'FP_CLI' ) ) {
+if ( ! class_exists( 'FIN_CLI' ) ) {
 	return;
 }
 
-$fpcli_core_autoloader = __DIR__ . '/vendor/autoload.php';
-if ( file_exists( $fpcli_core_autoloader ) ) {
-	require_once $fpcli_core_autoloader;
+$fincli_core_autoloader = __DIR__ . '/vendor/autoload.php';
+if ( file_exists( $fincli_core_autoloader ) ) {
+	require_once $fincli_core_autoloader;
 }
 
-FP_CLI::add_command( 'core', 'Core_Command' );
+FIN_CLI::add_command( 'core', 'Core_Command' );

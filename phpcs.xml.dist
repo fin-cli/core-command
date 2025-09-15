@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
-<ruleset name="FP-CLI-core">
-	<description>Custom ruleset for FP-CLI core-command</description>
+<ruleset name="FIN-CLI-core">
+	<description>Custom ruleset for FIN-CLI core-command</description>
 
 	<!--
 	#############################################################################
@@ -24,11 +24,11 @@
 
 	<!--
 	#############################################################################
-	USE THE FP_CLI_CS RULESET
+	USE THE FIN_CLI_CS RULESET
 	#############################################################################
 	-->
 
-	<rule ref="FP_CLI_CS"/>
+	<rule ref="FIN_CLI_CS"/>
 
 	<!--
 	#############################################################################
@@ -45,8 +45,8 @@
 	<rule ref="FinPress.NamingConventions.PrefixAllGlobals">
 		<properties>
 			<property name="prefixes" type="array">
-				<element value="FP_CLI\Core"/><!-- Namespaces. -->
-				<element value="fpcli_core"/><!-- Global variables and such. -->
+				<element value="FIN_CLI\Core"/><!-- Namespaces. -->
+				<element value="fincli_core"/><!-- Global variables and such. -->
 			</property>
 		</properties>
 	</rule>
