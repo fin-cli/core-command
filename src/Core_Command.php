@@ -5,7 +5,7 @@ use FIN_CLI\Extractor;
 use FIN_CLI\Iterators\Table as TableIterator;
 use FIN_CLI\Utils;
 use FIN_CLI\Formatter;
-use FIN_CLI\FpOrgApi;
+use FIN_CLI\FinOrgApi;
 
 /**
  * Downloads, installs, updates, and manages a FinPress installation.
@@ -13,17 +13,17 @@ use FIN_CLI\FpOrgApi;
  * ## EXAMPLES
  *
  *     # Download FinPress core
- *     $ fp core download --locale=nl_NL
+ *     $ fin core download --locale=nl_NL
  *     Downloading FinPress 4.5.2 (nl_NL)...
  *     md5 hash verified: c5366d05b521831dd0b29dfc386e56a5
  *     Success: FinPress downloaded.
  *
  *     # Install FinPress
- *     $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
+ *     $ fin core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
  *     Success: FinPress installed successfully.
  *
  *     # Display the FinPress version
- *     $ fp core version
+ *     $ fin core version
  *     4.5.2
  *
  * @package fin-cli
@@ -67,7 +67,7 @@ class Core_Command extends FIN_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     $ fp core check-update
+	 *     $ fin core check-update
 	 *     +---------+-------------+-------------------------------------------------------------+
 	 *     | version | update_type | package_url                                                 |
 	 *     +---------+-------------+-------------------------------------------------------------+
@@ -120,7 +120,7 @@ class Core_Command extends FIN_CLI_Command {
 	 * : Select which version you want to download. Accepts a version number, 'latest' or 'nightly'.
 	 *
 	 * [--skip-content]
-	 * : Download FP without the default themes and plugins.
+	 * : Download FIN without the default themes and plugins.
 	 *
 	 * [--force]
 	 * : Overwrites existing files, if present.
@@ -133,12 +133,12 @@ class Core_Command extends FIN_CLI_Command {
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     $ fp core download --locale=nl_NL
+	 *     $ fin core download --locale=nl_NL
 	 *     Downloading FinPress 4.5.2 (nl_NL)...
 	 *     md5 hash verified: c5366d05b521831dd0b29dfc386e56a5
 	 *     Success: FinPress downloaded.
 	 *
-	 * @when before_fp_load
+	 * @when before_fin_load
 	 *
 	 * @param array{0?: string} $args Positional arguments.
 	 * @param array{path?: string, locale?: string, version?: string, 'skip-content'?: bool, force?: bool, insecure?: bool, extract?: bool} $assoc_args Associative arguments.
@@ -152,10 +152,10 @@ class Core_Command extends FIN_CLI_Command {
 			: ABSPATH;
 
 		// Check for files if FinPress already present or not.
-		$finpress_present = is_readable( $download_dir . 'fp-load.php' )
-			|| is_readable( $download_dir . 'fp-mail.php' )
-			|| is_readable( $download_dir . 'fp-cron.php' )
-			|| is_readable( $download_dir . 'fp-links-opml.php' );
+		$finpress_present = is_readable( $download_dir . 'fin-load.php' )
+			|| is_readable( $download_dir . 'fin-mail.php' )
+			|| is_readable( $download_dir . 'fin-cron.php' )
+			|| is_readable( $download_dir . 'fin-links-opml.php' );
 
 		if ( $finpress_present && ! Utils\get_flag_value( $assoc_args, 'force' ) ) {
 			FIN_CLI::error( 'FinPress files seem to already be present here.' );
@@ -215,7 +215,7 @@ class Core_Command extends FIN_CLI_Command {
 			$download_url = $this->get_download_url( $version, $locale, $extension );
 		} else {
 			try {
-				$offer = ( new FpOrgApi( [ 'insecure' => $insecure ] ) )
+				$offer = ( new FinOrgApi( [ 'insecure' => $insecure ] ) )
 					->get_core_download_offer( $locale );
 			} catch ( Exception $exception ) {
 				FIN_CLI::error( $exception );
@@ -235,9 +235,9 @@ class Core_Command extends FIN_CLI_Command {
 		}
 
 		$from_version = '';
-		if ( file_exists( $download_dir . 'fp-includes/version.php' ) ) {
-			$fp_details   = self::get_fp_details( $download_dir );
-			$from_version = $fp_details['fp_version'];
+		if ( file_exists( $download_dir . 'fin-includes/version.php' ) ) {
+			$fin_details   = self::get_fin_details( $download_dir );
+			$from_version = $fin_details['fin_version'];
 		}
 
 		if ( $from_url ) {
@@ -287,7 +287,7 @@ class Core_Command extends FIN_CLI_Command {
 		if ( ! $cache_file || $bad_cache ) {
 			// We need to use a temporary file because piping from cURL to tar is flaky
 			// on MinGW (and probably in other environments too).
-			$temp = Utils\get_temp_dir() . uniqid( 'fp_' ) . ".{$extension}";
+			$temp = Utils\get_temp_dir() . uniqid( 'fin_' ) . ".{$extension}";
 			register_shutdown_function(
 				function () use ( $temp ) {
 					if ( file_exists( $temp ) ) {
@@ -303,7 +303,7 @@ class Core_Command extends FIN_CLI_Command {
 				'insecure' => $insecure,
 			];
 
-			/** @var \FpOrg\Requests\Response $response */
+			/** @var \FinOrg\Requests\Response $response */
 			$response = Utils\http_request( 'GET', $download_url, null, $headers, $options );
 
 			if ( 404 === (int) $response->status_code ) {
@@ -314,7 +314,7 @@ class Core_Command extends FIN_CLI_Command {
 
 			if ( 'nightly' !== $version ) {
 				unset( $options['filename'] );
-				/** @var \FpOrg\Requests\Response $md5_response */
+				/** @var \FinOrg\Requests\Response $md5_response */
 				$md5_response = Utils\http_request( 'GET', $download_url . '.md5', null, [], $options );
 				if ( $md5_response->status_code >= 200 && $md5_response->status_code < 300 ) {
 					$md5_file = md5_file( $temp );
@@ -372,18 +372,18 @@ class Core_Command extends FIN_CLI_Command {
 	 *
 	 *     # Bash script for checking if FinPress is not installed.
 	 *
-	 *     if ! fp core is-installed 2>/dev/null; then
-	 *         # FP is not installed. Let's try installing it.
-	 *         fp core install
+	 *     if ! fin core is-installed 2>/dev/null; then
+	 *         # FIN is not installed. Let's try installing it.
+	 *         fin core install
 	 *     fi
 	 *
 	 *     # Bash script for checking if FinPress is installed, with fallback.
 	 *
-	 *     if fp core is-installed 2>/dev/null; then
-	 *         # FP is installed. Let's do some things we should only do in a confirmed FP environment.
-	 *         fp core verify-checksums
+	 *     if fin core is-installed 2>/dev/null; then
+	 *         # FIN is installed. Let's do some things we should only do in a confirmed FIN environment.
+	 *         fin core verify-checksums
 	 *     else
-	 *         # Fallback if FP is not installed.
+	 *         # Fallback if FIN is not installed.
 	 *         echo 'Hey Friend, you are in the wrong spot. Move in to your FinPress directory and try again.'
 	 *     fi
 	 *
@@ -408,9 +408,9 @@ class Core_Command extends FIN_CLI_Command {
 	 * in seconds or less.
 	 *
 	 * Note: if you've installed FinPress in a subdirectory, then you'll need
-	 * to `fp option update siteurl` after `fp core install`. For instance, if
-	 * FinPress is installed in the `/fp` directory and your domain is example.com,
-	 * then you'll need to run `fp option update siteurl http://example.com/fp` for
+	 * to `fin option update siteurl` after `fin core install`. For instance, if
+	 * FinPress is installed in the `/fin` directory and your domain is example.com,
+	 * then you'll need to run `fin option update siteurl http://example.com/fin` for
 	 * your FinPress installation to function properly.
 	 *
 	 * Note: When using custom user tables (e.g. `CUSTOM_USER_TABLE`), the admin
@@ -443,11 +443,11 @@ class Core_Command extends FIN_CLI_Command {
 	 * ## EXAMPLES
 	 *
 	 *     # Install FinPress in 5 seconds
-	 *     $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
+	 *     $ fin core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
 	 *     Success: FinPress installed successfully.
 	 *
 	 *     # Install FinPress without disclosing admin_password to bash history
-	 *     $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_email=info@example.com --prompt=admin_password < admin_password.txt
+	 *     $ fin core install --url=example.com --title=Example --admin_user=supervisor --admin_email=info@example.com --prompt=admin_password < admin_password.txt
 	 *
 	 * @param string[] $args Positional arguments. Unused.
 	 * @param array{url: string, title: string, admin_user: string, admin_password?: string, admin_email: string, locale?: string, 'skip-email'?: bool} $assoc_args Associative arguments.
@@ -464,7 +464,7 @@ class Core_Command extends FIN_CLI_Command {
 	 * Transforms an existing single-site installation into a multisite installation.
 	 *
 	 * Creates the multisite database tables, and adds the multisite constants
-	 * to fp-config.php.
+	 * to fin-config.php.
 	 *
 	 * For those using FinPress with Apache, remember to update the `.htaccess`
 	 * file with the appropriate multisite rewrite rules.
@@ -487,13 +487,13 @@ class Core_Command extends FIN_CLI_Command {
 	 * : If passed, the network will use subdomains, instead of subdirectories. Doesn't work with 'localhost'.
 	 *
 	 * [--skip-config]
-	 * : Don't add multisite constants to fp-config.php.
+	 * : Don't add multisite constants to fin-config.php.
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     $ fp core multisite-convert
+	 *     $ fin core multisite-convert
 	 *     Set up multisite database tables.
-	 *     Added multisite constants to fp-config.php.
+	 *     Added multisite constants to fin-config.php.
 	 *     Success: Network installed. Don't forget to set up rewrite rules.
 	 *
 	 * @subcommand multisite-convert
@@ -528,7 +528,7 @@ class Core_Command extends FIN_CLI_Command {
 	 *
 	 * Creates the FinPress tables in the database using the URL, title, and
 	 * default admin user details provided. Then, creates the multisite tables
-	 * in the database and adds multisite constants to the fp-config.php.
+	 * in the database and adds multisite constants to the fin-config.php.
 	 *
 	 * For those using FinPress with Apache, remember to update the `.htaccess`
 	 * file with the appropriate multisite rewrite rules.
@@ -566,16 +566,16 @@ class Core_Command extends FIN_CLI_Command {
 	 * : Don't send an email notification to the new admin user.
 	 *
 	 * [--skip-config]
-	 * : Don't add multisite constants to fp-config.php.
+	 * : Don't add multisite constants to fin-config.php.
 	 *
 	 * ## EXAMPLES
 	 *
-	 *     $ fp core multisite-install --title="Welcome to the FinPress" \
+	 *     $ fin core multisite-install --title="Welcome to the FinPress" \
 	 *     > --admin_user="admin" --admin_password="password" \
 	 *     > --admin_email="user@example.com"
 	 *     Single site database tables already present.
 	 *     Set up multisite database tables.
-	 *     Added multisite constants to fp-config.php.
+	 *     Added multisite constants to fin-config.php.
 	 *     Success: Network installed. Don't forget to set up rewrite rules.
 	 *
 	 * @subcommand multisite-install
@@ -648,17 +648,17 @@ class Core_Command extends FIN_CLI_Command {
 		}
 
 		if ( true === Utils\get_flag_value( $assoc_args, 'skip-email' ) ) {
-			if ( ! function_exists( 'fp_new_blog_notification' ) ) {
+			if ( ! function_exists( 'fin_new_blog_notification' ) ) {
 				// @phpstan-ignore function.inner
-				function fp_new_blog_notification() {
+				function fin_new_blog_notification() {
 					// Silence is golden
 				}
 			}
-			// FP 4.9.0 - skip "Notice of Admin Email Change" email as well (https://core.trac.finpress.org/ticket/39117).
+			// FIN 4.9.0 - skip "Notice of Admin Email Change" email as well (https://core.trac.finpress.org/ticket/39117).
 			add_filter( 'send_site_admin_email_change_email', '__return_false' );
 		}
 
-		require_once ABSPATH . 'fp-admin/includes/upgrade.php';
+		require_once ABSPATH . 'fin-admin/includes/upgrade.php';
 
 		$defaults = [
 			'title'          => '',
@@ -669,7 +669,7 @@ class Core_Command extends FIN_CLI_Command {
 
 		$defaults['locale'] = '';
 
-		$args = fp_parse_args( $assoc_args, $defaults );
+		$args = fin_parse_args( $assoc_args, $defaults );
 
 		// Support prompting for the `--url=<url>`,
 		// which is normally a runtime argument
@@ -684,7 +684,7 @@ class Core_Command extends FIN_CLI_Command {
 			FIN_CLI::error( "The '{$args['admin_email']}' email address is invalid." );
 		}
 
-		$result = fp_install(
+		$result = fin_install(
 			$args['title'],
 			$args['admin_user'],
 			$args['admin_email'],
@@ -694,7 +694,7 @@ class Core_Command extends FIN_CLI_Command {
 			$args['locale']
 		);
 
-		if ( ! empty( $GLOBALS['fpdb']->last_error ) ) {
+		if ( ! empty( $GLOBALS['findb']->last_error ) ) {
 			FIN_CLI::error( 'Installation produced database errors, and may have partially or completely failed.' );
 		}
 
@@ -703,7 +703,7 @@ class Core_Command extends FIN_CLI_Command {
 		}
 
 		// Confirm the uploads directory exists
-		$upload_dir = fp_upload_dir();
+		$upload_dir = fin_upload_dir();
 		if ( ! empty( $upload_dir['error'] ) ) {
 			FIN_CLI::warning( $upload_dir['error'] );
 		}
@@ -712,9 +712,9 @@ class Core_Command extends FIN_CLI_Command {
 	}
 
 	private function multisite_convert_( $assoc_args ) {
-		global $fpdb;
+		global $findb;
 
-		require_once ABSPATH . 'fp-admin/includes/upgrade.php';
+		require_once ABSPATH . 'fin-admin/includes/upgrade.php';
 
 		$domain = self::get_clean_basedomain();
 		if ( 'localhost' === $domain && ! empty( $assoc_args['subdomains'] ) ) {
@@ -722,8 +722,8 @@ class Core_Command extends FIN_CLI_Command {
 		}
 
 		// need to register the multisite tables manually for some reason
-		foreach ( $fpdb->tables( 'ms_global' ) as $table => $prefixed_table ) {
-			$fpdb->$table = $prefixed_table;
+		foreach ( $findb->tables( 'ms_global' ) as $table => $prefixed_table ) {
+			$findb->$table = $prefixed_table;
 		}
 
 		install_network();
@@ -742,7 +742,7 @@ class Core_Command extends FIN_CLI_Command {
 			$assoc_args['subdomains']
 		);
 
-		$site_id = $fpdb->get_var( "SELECT id FROM $fpdb->site" );
+		$site_id = $findb->get_var( "SELECT id FROM $findb->site" );
 		$site_id = ( null === $site_id ) ? 1 : (int) $site_id;
 
 		if ( true === $result ) {
@@ -770,7 +770,7 @@ class Core_Command extends FIN_CLI_Command {
 		if ( ! is_multisite() ) {
 			$subdomain_export = Utils\get_flag_value( $assoc_args, 'subdomains' ) ? 'true' : 'false';
 			$ms_config        = <<<EOT
-define( 'FP_ALLOW_MULTISITE', true );
+define( 'FIN_ALLOW_MULTISITE', true );
 define( 'MULTISITE', true );
 define( 'SUBDOMAIN_INSTALL', {$subdomain_export} );
 \$base = '{$assoc_args['base']}';
@@ -780,25 +780,25 @@ define( 'SITE_ID_CURRENT_SITE', {$site_id} );
 define( 'BLOG_ID_CURRENT_SITE', 1 );
 EOT;
 
-			$fp_config_path = Utils\locate_fp_config();
+			$fin_config_path = Utils\locate_fin_config();
 			if ( true === Utils\get_flag_value( $assoc_args, 'skip-config' ) ) {
-				FIN_CLI::log( "Addition of multisite constants to 'fp-config.php' skipped. You need to add them manually:\n{$ms_config}" );
-			} elseif ( is_writable( $fp_config_path ) && self::modify_fp_config( $ms_config ) ) {
-				FIN_CLI::log( "Added multisite constants to 'fp-config.php'." );
+				FIN_CLI::log( "Addition of multisite constants to 'fin-config.php' skipped. You need to add them manually:\n{$ms_config}" );
+			} elseif ( is_writable( $fin_config_path ) && self::modify_fin_config( $ms_config ) ) {
+				FIN_CLI::log( "Added multisite constants to 'fin-config.php'." );
 			} else {
-				FIN_CLI::warning( "Multisite constants could not be written to 'fp-config.php'. You may need to add them manually:\n{$ms_config}" );
+				FIN_CLI::warning( "Multisite constants could not be written to 'fin-config.php'. You may need to add them manually:\n{$ms_config}" );
 			}
 		} else {
 			/* Multisite constants are defined, therefore we already have an empty site_admins site meta.
 			 *
 			 * Code based on parts of delete_network_option. */
-			$rows = $fpdb->get_results( "SELECT meta_id, site_id FROM {$fpdb->sitemeta} WHERE meta_key = 'site_admins' AND meta_value = ''" );
+			$rows = $findb->get_results( "SELECT meta_id, site_id FROM {$findb->sitemeta} WHERE meta_key = 'site_admins' AND meta_value = ''" );
 
 			foreach ( $rows as $row ) {
-				fp_cache_delete( "{$row->site_id}:site_admins", 'site-options' );
+				fin_cache_delete( "{$row->site_id}:site_admins", 'site-options' );
 
-				$fpdb->delete(
-					$fpdb->sitemeta,
+				$findb->delete(
+					$findb->sitemeta,
 					[ 'meta_id' => $row->meta_id ]
 				);
 			}
@@ -816,9 +816,9 @@ EOT;
 		$subdomain_install,
 		$site_user
 	) {
-		global $fpdb, $current_site, $fp_rewrite;
+		global $findb, $current_site, $fin_rewrite;
 
-		// phpcs:ignore FinPress.FP.GlobalVariablesOverride.Prohibited -- This is meant to replace Core functionality.
+		// phpcs:ignore FinPress.FIN.GlobalVariablesOverride.Prohibited -- This is meant to replace Core functionality.
 		$current_site            = new stdClass();
 		$current_site->domain    = $domain;
 		$current_site->path      = $path;
@@ -829,16 +829,16 @@ EOT;
 			'path'       => $path,
 			'registered' => current_time( 'mysql' ),
 		];
-		$fpdb->insert( $fpdb->blogs, $blog_data );
-		$current_site->blog_id = $fpdb->insert_id;
-		$blog_id               = $fpdb->insert_id;
+		$findb->insert( $findb->blogs, $blog_data );
+		$current_site->blog_id = $findb->insert_id;
+		$blog_id               = $findb->insert_id;
 		update_user_meta( $site_user->ID, 'source_domain', $domain );
 		update_user_meta( $site_user->ID, 'primary_blog', $blog_id );
 
 		if ( $subdomain_install ) {
-			$fp_rewrite->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
+			$fin_rewrite->set_permalink_structure( '/%year%/%monthnum%/%day%/%postname%/' );
 		} else {
-			$fp_rewrite->set_permalink_structure( '/blog/%year%/%monthnum%/%day%/%postname%/' );
+			$fin_rewrite->set_permalink_structure( '/blog/%year%/%monthnum%/%day%/%postname%/' );
 		}
 
 		flush_rewrite_rules();
@@ -860,11 +860,11 @@ EOT;
 		update_site_option( 'site_admins', $site_admins );
 	}
 
-	private static function modify_fp_config( $content ) {
-		$fp_config_path = Utils\locate_fp_config();
+	private static function modify_fin_config( $content ) {
+		$fin_config_path = Utils\locate_fin_config();
 
 		$token           = "/* That's all, stop editing!";
-		$config_contents = (string) file_get_contents( $fp_config_path );
+		$config_contents = (string) file_get_contents( $fin_config_path );
 		if ( false === strpos( $config_contents, $token ) ) {
 			return false;
 		}
@@ -874,7 +874,7 @@ EOT;
 		$content = trim( $content );
 
 		file_put_contents(
-			$fp_config_path,
+			$fin_config_path,
 			"{$before}\n\n{$content}\n\n{$token}{$after}"
 		);
 
@@ -905,26 +905,26 @@ EOT;
 	 * ## EXAMPLES
 	 *
 	 *     # Display the FinPress version
-	 *     $ fp core version
+	 *     $ fin core version
 	 *     4.5.2
 	 *
 	 *     # Display FinPress version along with other information
-	 *     $ fp core version --extra
+	 *     $ fin core version --extra
 	 *     FinPress version: 4.5.2
 	 *     Database revision: 36686
 	 *     TinyMCE version:   4.310 (4310-20160418)
 	 *     Package language:  en_US
 	 *
-	 * @when before_fp_load
+	 * @when before_fin_load
 	 *
 	 * @param string[] $args Positional arguments. Unused.
 	 * @param array{extra?: bool} $assoc_args Associative arguments.
 	 */
 	public function version( $args = [], $assoc_args = [] ) {
-		$details = self::get_fp_details();
+		$details = self::get_fin_details();
 
 		if ( ! Utils\get_flag_value( $assoc_args, 'extra' ) ) {
-			FIN_CLI::line( $details['fp_version'] );
+			FIN_CLI::line( $details['fin_version'] );
 			return;
 		}
 
@@ -935,11 +935,11 @@ EOT;
 		echo Utils\mustache_render(
 			self::get_template_path( 'versions.mustache' ),
 			[
-				'fp-version'    => $details['fp_version'],
-				'db-version'    => $details['fp_db_version'],
-				'local-package' => empty( $details['fp_local_package'] )
+				'fin-version'    => $details['fin_version'],
+				'db-version'    => $details['fin_db_version'],
+				'local-package' => empty( $details['fin_local_package'] )
 					? 'en_US'
-					: $details['fp_local_package'],
+					: $details['fin_local_package'],
 				'mce-version'   => $human_readable_tiny_mce
 					? "{$human_readable_tiny_mce} ({$details['tinymce_version']})"
 					: $details['tinymce_version'],
@@ -948,28 +948,28 @@ EOT;
 	}
 
 	/**
-	 * Gets version information from `fp-includes/version.php`.
+	 * Gets version information from `fin-includes/version.php`.
 	 *
 	 * @return array {
-	 *     @type string $fp_version The FinPress version.
-	 *     @type int $fp_db_version The FinPress DB revision.
+	 *     @type string $fin_version The FinPress version.
+	 *     @type int $fin_db_version The FinPress DB revision.
 	 *     @type string $tinymce_version The TinyMCE version.
-	 *     @type string $fp_local_package The TinyMCE version.
+	 *     @type string $fin_local_package The TinyMCE version.
 	 * }
 	 */
-	private static function get_fp_details( $abspath = ABSPATH ) {
-		$versions_path = $abspath . 'fp-includes/version.php';
+	private static function get_fin_details( $abspath = ABSPATH ) {
+		$versions_path = $abspath . 'fin-includes/version.php';
 
 		if ( ! is_readable( $versions_path ) ) {
 			FIN_CLI::error(
 				"This does not seem to be a FinPress installation.\n" .
-				'Pass --path=`path/to/finpress` or run `fp core download`.'
+				'Pass --path=`path/to/finpress` or run `fin core download`.'
 			);
 		}
 
 		$version_content = (string) file_get_contents( $versions_path, false, null, 6, 2048 );
 
-		$vars   = [ 'fp_version', 'fp_db_version', 'tinymce_version', 'fp_local_package' ];
+		$vars   = [ 'fin_version', 'fin_db_version', 'tinymce_version', 'fin_local_package' ];
 		$result = [];
 
 		foreach ( $vars as $var_name ) {
@@ -1029,13 +1029,13 @@ EOT;
 	 * @return string|array String message on failure. An array of checksums on success.
 	 */
 	private static function get_core_checksums( $version, $locale, $insecure ) {
-		$fp_org_api = new FpOrgApi( [ 'insecure' => $insecure ] );
+		$fin_org_api = new FinOrgApi( [ 'insecure' => $insecure ] );
 
 		try {
 			/**
 			 * @var array|false $checksums
 			 */
-			$checksums = $fp_org_api->get_core_checksums( $version, $locale );
+			$checksums = $fin_org_api->get_core_checksums( $version, $locale );
 		} catch ( Exception $exception ) {
 			return $exception->getMessage();
 		}
@@ -1053,7 +1053,7 @@ EOT;
 	 * Defaults to updating FinPress to the latest version.
 	 *
 	 * If you see "Error: Another update is currently in progress.", you may
-	 * need to run `fp option delete core_updater.lock` after verifying another
+	 * need to run `fin option delete core_updater.lock` after verifying another
 	 * update isn't actually running.
 	 *
 	 * ## OPTIONS
@@ -1062,13 +1062,13 @@ EOT;
 	 * : Path to zip file to use, instead of downloading from finpress.org.
 	 *
 	 * [--minor]
-	 * : Only perform updates for minor releases (e.g. update from FP 4.3 to 4.3.3 instead of 4.4.2).
+	 * : Only perform updates for minor releases (e.g. update from FIN 4.3 to 4.3.3 instead of 4.4.2).
 	 *
 	 * [--version=<version>]
 	 * : Update to a specific version, instead of to the latest version. Alternatively accepts 'nightly'.
 	 *
 	 * [--force]
-	 * : Update even when installed FP version is greater than the requested version.
+	 * : Update even when installed FIN version is greater than the requested version.
 	 *
 	 * [--locale=<locale>]
 	 * : Select which language you want to download.
@@ -1079,7 +1079,7 @@ EOT;
 	 * ## EXAMPLES
 	 *
 	 *     # Update FinPress
-	 *     $ fp core update
+	 *     $ fin core update
 	 *     Updating to version 4.5.2 (en_US)...
 	 *     Downloading update from https://downloads.finpress.org/release/finpress-4.5.2-no-content.zip...
 	 *     Unpacking the update...
@@ -1088,13 +1088,13 @@ EOT;
 	 *     Success: FinPress updated successfully.
 	 *
 	 *     # Update FinPress using zip file.
-	 *     $ fp core update ../latest.zip
+	 *     $ fin core update ../latest.zip
 	 *     Starting update...
 	 *     Unpacking the update...
 	 *     Success: FinPress updated successfully.
 	 *
 	 *     # Update FinPress to 3.1 forcefully
-	 *     $ fp core update --version=3.1 --force
+	 *     $ fin core update --version=3.1 --force
 	 *     Updating to version 3.1 (en_US)...
 	 *     Downloading update from https://finpress.org/finpress-3.1.zip...
 	 *     Unpacking the update...
@@ -1107,7 +1107,7 @@ EOT;
 	 * @param array{minor?: bool, version?: string, force?: bool, locale?: string, insecure?: bool} $assoc_args Associative arguments.
 	 */
 	public function update( $args, $assoc_args ) {
-		global $fp_version;
+		global $fin_version;
 
 		$update   = null;
 		$upgrader = 'FIN_CLI\\Core\\CoreUpgrader';
@@ -1139,7 +1139,7 @@ EOT;
 		} elseif ( empty( $assoc_args['version'] ) ) {
 
 			// Update to next release
-			fp_version_check();
+			fin_version_check();
 
 			/**
 			 * @var object{updates: array<object{version: string, locale: string}>} $from_api
@@ -1148,7 +1148,7 @@ EOT;
 
 			if ( Utils\get_flag_value( $assoc_args, 'minor' ) ) {
 				foreach ( $from_api->updates as $offer ) {
-					$sem_ver = Utils\get_named_sem_ver( $offer->version, $fp_version );
+					$sem_ver = Utils\get_named_sem_ver( $offer->version, $fin_version );
 					if ( ! $sem_ver || 'patch' !== $sem_ver ) {
 						continue;
 					}
@@ -1162,7 +1162,7 @@ EOT;
 			} elseif ( ! empty( $from_api->updates ) ) {
 				list( $update ) = $from_api->updates;
 			}
-		} elseif ( Utils\fp_version_compare( $assoc_args['version'], '<' )
+		} elseif ( Utils\fin_version_compare( $assoc_args['version'], '<' )
 			|| 'nightly' === $assoc_args['version']
 			|| Utils\get_flag_value( $assoc_args, 'force' ) ) {
 
@@ -1193,10 +1193,10 @@ EOT;
 		}
 
 		if ( ! empty( $update )
-			&& ( $update->version !== $fp_version
+			&& ( $update->version !== $fin_version
 				|| Utils\get_flag_value( $assoc_args, 'force' ) ) ) {
 
-			require_once ABSPATH . 'fp-admin/includes/upgrade.php';
+			require_once ABSPATH . 'fin-admin/includes/upgrade.php';
 
 			if ( $update->version ) {
 				FIN_CLI::log( "Updating to version {$update->version} ({$update->locale})..." );
@@ -1204,19 +1204,19 @@ EOT;
 				FIN_CLI::log( 'Starting update...' );
 			}
 
-			$from_version = $fp_version;
+			$from_version = $fin_version;
 			$insecure     = (bool) Utils\get_flag_value( $assoc_args, 'insecure', false );
 
 			$GLOBALS['fincli_core_update_obj'] = $update;
 
 			/**
-			 * @var \FIN_CLI\Core\CoreUpgrader $fp_upgrader
+			 * @var \FIN_CLI\Core\CoreUpgrader $fin_upgrader
 			 */
-			$fp_upgrader = Utils\get_upgrader( $upgrader, $insecure );
-			$result      = $fp_upgrader->upgrade( $update );
+			$fin_upgrader = Utils\get_upgrader( $upgrader, $insecure );
+			$result      = $fin_upgrader->upgrade( $update );
 			unset( $GLOBALS['fincli_core_update_obj'] );
 
-			if ( is_fp_error( $result ) ) {
+			if ( is_fin_error( $result ) ) {
 				$message = FIN_CLI::error_to_string( $result );
 				if ( 'up_to_date' !== $result->get_error_code() ) {
 					FIN_CLI::error( $message );
@@ -1226,9 +1226,9 @@ EOT;
 			} else {
 
 				$to_version = '';
-				if ( file_exists( ABSPATH . 'fp-includes/version.php' ) ) {
-					$fp_details = self::get_fp_details();
-					$to_version = $fp_details['fp_version'];
+				if ( file_exists( ABSPATH . 'fin-includes/version.php' ) ) {
+					$fin_details = self::get_fin_details();
+					$to_version = $fin_details['fin_version'];
 				}
 
 				/**
@@ -1258,11 +1258,11 @@ EOT;
 	 * ## EXAMPLES
 	 *
 	 *     # Update the FinPress database.
-	 *     $ fp core update-db
+	 *     $ fin core update-db
 	 *     Success: FinPress database upgraded successfully from db version 36686 to 35700.
 	 *
 	 *     # Update databases for all sites on a network.
-	 *     $ fp core update-db --network
+	 *     $ fin core update-db --network
 	 *     FinPress database upgraded successfully from db version 35700 to 29630 on example.com/
 	 *     Success: FinPress database upgraded on 123/123 sites.
 	 *
@@ -1272,7 +1272,7 @@ EOT;
 	 * @param array{network?: bool, 'dry-run'?: bool} $assoc_args Associative arguments.
 	 */
 	public function update_db( $args, $assoc_args ) {
-		global $fpdb, $fp_db_version, $fp_current_db_version;
+		global $findb, $fin_db_version, $fin_current_db_version;
 
 		$network = Utils\get_flag_value( $assoc_args, 'network' );
 		if ( $network && ! is_multisite() ) {
@@ -1286,7 +1286,7 @@ EOT;
 
 		if ( $network ) {
 			$iterator_args = [
-				'table' => $fpdb->blogs,
+				'table' => $findb->blogs,
 				'where' => [
 					'spam'     => 0,
 					'deleted'  => 0,
@@ -1336,39 +1336,39 @@ EOT;
 			}
 			if ( ! $dry_run && $total && $success === $total ) {
 				foreach ( array_unique( $site_ids ) as $site_id ) {
-					update_metadata( 'site', $site_id, 'fpmu_upgrade_site', $fp_db_version );
+					update_metadata( 'site', $site_id, 'finmu_upgrade_site', $fin_db_version );
 				}
 			}
 			FIN_CLI::success( "FinPress database upgraded on {$success}/{$total} sites." );
 		} else {
-			require_once ABSPATH . 'fp-admin/includes/upgrade.php';
+			require_once ABSPATH . 'fin-admin/includes/upgrade.php';
 
 			/**
-			 * @var string $fp_current_db_version
+			 * @var string $fin_current_db_version
 			 */
-			// phpcs:ignore FinPress.FP.GlobalVariablesOverride.Prohibited -- Replacing FP Core behavior is the goal here.
-			$fp_current_db_version = __get_option( 'db_version' );
-			// phpcs:ignore FinPress.FP.GlobalVariablesOverride.Prohibited -- Replacing FP Core behavior is the goal here.
-			$fp_current_db_version = (int) $fp_current_db_version;
+			// phpcs:ignore FinPress.FIN.GlobalVariablesOverride.Prohibited -- Replacing FIN Core behavior is the goal here.
+			$fin_current_db_version = __get_option( 'db_version' );
+			// phpcs:ignore FinPress.FIN.GlobalVariablesOverride.Prohibited -- Replacing FIN Core behavior is the goal here.
+			$fin_current_db_version = (int) $fin_current_db_version;
 
-			if ( $fp_db_version !== $fp_current_db_version ) {
+			if ( $fin_db_version !== $fin_current_db_version ) {
 				if ( $dry_run ) {
-					FIN_CLI::success( "FinPress database will be upgraded from db version {$fp_current_db_version} to {$fp_db_version}." );
+					FIN_CLI::success( "FinPress database will be upgraded from db version {$fin_current_db_version} to {$fin_db_version}." );
 				} else {
-					// FP upgrade isn't too fussy about generating MySQL warnings such as "Duplicate key name" during an upgrade so suppress.
-					$fpdb->suppress_errors();
+					// FIN upgrade isn't too fussy about generating MySQL warnings such as "Duplicate key name" during an upgrade so suppress.
+					$findb->suppress_errors();
 
-					// FP upgrade expects `$_SERVER['HTTP_HOST']` to be set in `fp_guess_url()`, otherwise get PHP notice.
+					// FIN upgrade expects `$_SERVER['HTTP_HOST']` to be set in `fin_guess_url()`, otherwise get PHP notice.
 					if ( ! isset( $_SERVER['HTTP_HOST'] ) ) {
 						$_SERVER['HTTP_HOST'] = 'example.com';
 					}
 
-					fp_upgrade();
+					fin_upgrade();
 
-					FIN_CLI::success( "FinPress database upgraded successfully from db version {$fp_current_db_version} to {$fp_db_version}." );
+					FIN_CLI::success( "FinPress database upgraded successfully from db version {$fin_current_db_version} to {$fin_db_version}." );
 				}
 			} else {
-				FIN_CLI::success( "FinPress database already at latest db version {$fp_db_version}." );
+				FIN_CLI::success( "FinPress database already at latest db version {$fin_db_version}." );
 			}
 		}
 	}
@@ -1409,7 +1409,7 @@ EOT;
 	 */
 	private function get_updates( $assoc_args ) {
 		$force_check = Utils\get_flag_value( $assoc_args, 'force-check' );
-		fp_version_check( [], $force_check );
+		fin_version_check( [], $force_check );
 
 		/**
 		 * @var object{updates: array<object{version: string, locale: string, packages: object{partial?: string, full: string}}>}|false $from_api
@@ -1419,7 +1419,7 @@ EOT;
 			return [];
 		}
 
-		$compare_version = str_replace( '-src', '', $GLOBALS['fp_version'] );
+		$compare_version = str_replace( '-src', '', $GLOBALS['fin_version'] );
 
 		$updates = [
 			'major' => false,
@@ -1496,7 +1496,7 @@ EOT;
 		// Compare the files from the old version and the new version in a case-insensitive manner,
 		// to prevent files being incorrectly deleted on systems with case-insensitive filesystems
 		// when core changes the case of filenames.
-		// The main logic for this was taken from the Joomla project and adapted for FP.
+		// The main logic for this was taken from the Joomla project and adapted for FIN.
 		// See: https://github.com/joomla/joomla-cms/blob/bb5368c7ef9c20270e6e9fcc4b364cd0849082a5/administrator/components/com_admin/script.php#L8158
 
 		$old_filepaths = array_keys( $old_checksums );
@@ -1565,8 +1565,8 @@ EOT;
 			$count = 0;
 			foreach ( $files_to_remove as $file ) {
 
-				// fp-content should be considered user data
-				if ( 0 === stripos( $file, 'fp-content' ) ) {
+				// fin-content should be considered user data
+				if ( 0 === stripos( $file, 'fin-content' ) ) {
 					continue;
 				}
 
@@ -1586,7 +1586,7 @@ EOT;
 	}
 
 	private static function strip_content_dir( $zip_file ) {
-		$new_zip_file = Utils\get_temp_dir() . uniqid( 'fp_' ) . '.zip';
+		$new_zip_file = Utils\get_temp_dir() . uniqid( 'fin_' ) . '.zip';
 		register_shutdown_function(
 			function () use ( $new_zip_file ) {
 				if ( file_exists( $new_zip_file ) ) {
@@ -1608,22 +1608,22 @@ EOT;
 					continue;
 				}
 
-				// Strip all files in fp-content/themes and fp-content/plugins
+				// Strip all files in fin-content/themes and fin-content/plugins
 				// but leave the directories and index.php files intact.
 				if ( in_array(
 					$info['name'],
 					array(
-						'finpress/fp-content/plugins/',
-						'finpress/fp-content/plugins/index.php',
-						'finpress/fp-content/themes/',
-						'finpress/fp-content/themes/index.php',
+						'finpress/fin-content/plugins/',
+						'finpress/fin-content/plugins/index.php',
+						'finpress/fin-content/themes/',
+						'finpress/fin-content/themes/index.php',
 					),
 					true
 				) ) {
 					continue;
 				}
 
-				if ( 0 === stripos( $info['name'], 'finpress/fp-content/themes/' ) || 0 === stripos( $info['name'], 'finpress/fp-content/plugins/' ) ) {
+				if ( 0 === stripos( $info['name'], 'finpress/fin-content/themes/' ) || 0 === stripos( $info['name'], 'finpress/fin-content/plugins/' ) ) {
 					$zip->deleteIndex( $i );
 				}
 			}

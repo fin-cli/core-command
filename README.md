@@ -11,38 +11,38 @@ Quick links: [Using](#using) | [Installing](#installing) | [Contributing](#contr
 
 This package implements the following commands:
 
-### fp core
+### fin core
 
 Downloads, installs, updates, and manages a FinPress installation.
 
 ~~~
-fp core
+fin core
 ~~~
 
 **EXAMPLES**
 
     # Download FinPress core
-    $ fp core download --locale=nl_NL
+    $ fin core download --locale=nl_NL
     Downloading FinPress 4.5.2 (nl_NL)...
     md5 hash verified: c5366d05b521831dd0b29dfc386e56a5
     Success: FinPress downloaded.
 
     # Install FinPress
-    $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
+    $ fin core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
     Success: FinPress installed successfully.
 
     # Display the FinPress version
-    $ fp core version
+    $ fin core version
     4.5.2
 
 
 
-### fp core check-update
+### fin core check-update
 
 Checks for FinPress updates via Version Check API.
 
 ~~~
-fp core check-update [--minor] [--major] [--force-check] [--field=<field>] [--fields=<fields>] [--format=<format>]
+fin core check-update [--minor] [--major] [--force-check] [--field=<field>] [--fields=<fields>] [--format=<format>]
 ~~~
 
 Lists the most recent versions when there are updates available,
@@ -79,7 +79,7 @@ or success message when up to date.
 
 **EXAMPLES**
 
-    $ fp core check-update
+    $ fin core check-update
     +---------+-------------+-------------------------------------------------------------+
     | version | update_type | package_url                                                 |
     +---------+-------------+-------------------------------------------------------------+
@@ -88,12 +88,12 @@ or success message when up to date.
 
 
 
-### fp core download
+### fin core download
 
 Downloads core FinPress files.
 
 ~~~
-fp core download [<download-url>] [--path=<path>] [--locale=<locale>] [--version=<version>] [--skip-content] [--force] [--insecure] [--extract]
+fin core download [<download-url>] [--path=<path>] [--locale=<locale>] [--version=<version>] [--skip-content] [--force] [--insecure] [--extract]
 ~~~
 
 Downloads and extracts FinPress core files to the specified path. Uses
@@ -117,7 +117,7 @@ Subsequent uses of command will use the local cache if it still exists.
 		Select which version you want to download. Accepts a version number, 'latest' or 'nightly'.
 
 	[--skip-content]
-		Download FP without the default themes and plugins.
+		Download FIN without the default themes and plugins.
 
 	[--force]
 		Overwrites existing files, if present.
@@ -130,19 +130,19 @@ Subsequent uses of command will use the local cache if it still exists.
 
 **EXAMPLES**
 
-    $ fp core download --locale=nl_NL
+    $ fin core download --locale=nl_NL
     Downloading FinPress 4.5.2 (nl_NL)...
     md5 hash verified: c5366d05b521831dd0b29dfc386e56a5
     Success: FinPress downloaded.
 
 
 
-### fp core install
+### fin core install
 
 Runs the standard FinPress installation process.
 
 ~~~
-fp core install --url=<url> --title=<site-title> --admin_user=<username> [--admin_password=<password>] --admin_email=<email> [--locale=<locale>] [--skip-email]
+fin core install --url=<url> --title=<site-title> --admin_user=<username> [--admin_password=<password>] --admin_email=<email> [--locale=<locale>] [--skip-email]
 ~~~
 
 Creates the FinPress tables in the database using the URL, title, and
@@ -150,9 +150,9 @@ default admin user details provided. Performs the famous 5 minute install
 in seconds or less.
 
 Note: if you've installed FinPress in a subdirectory, then you'll need
-to `fp option update siteurl` after `fp core install`. For instance, if
-FinPress is installed in the `/fp` directory and your domain is example.com,
-then you'll need to run `fp option update siteurl http://example.com/fp` for
+to `fin option update siteurl` after `fin core install`. For instance, if
+FinPress is installed in the `/fin` directory and your domain is example.com,
+then you'll need to run `fin option update siteurl http://example.com/fin` for
 your FinPress installation to function properly.
 
 Note: When using custom user tables (e.g. `CUSTOM_USER_TABLE`), the admin
@@ -185,20 +185,20 @@ user_login doesn't exist, a new user will be created.
 **EXAMPLES**
 
     # Install FinPress in 5 seconds
-    $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
+    $ fin core install --url=example.com --title=Example --admin_user=supervisor --admin_password=strongpassword --admin_email=info@example.com
     Success: FinPress installed successfully.
 
     # Install FinPress without disclosing admin_password to bash history
-    $ fp core install --url=example.com --title=Example --admin_user=supervisor --admin_email=info@example.com --prompt=admin_password < admin_password.txt
+    $ fin core install --url=example.com --title=Example --admin_user=supervisor --admin_email=info@example.com --prompt=admin_password < admin_password.txt
 
 
 
-### fp core is-installed
+### fin core is-installed
 
 Checks if FinPress is installed.
 
 ~~~
-fp core is-installed [--network]
+fin core is-installed [--network]
 ~~~
 
 Determines whether FinPress is installed by checking if the standard
@@ -214,33 +214,33 @@ to communicate whether FinPress is installed.
 
     # Bash script for checking if FinPress is not installed.
 
-    if ! fp core is-installed 2>/dev/null; then
-        # FP is not installed. Let's try installing it.
-        fp core install
+    if ! fin core is-installed 2>/dev/null; then
+        # FIN is not installed. Let's try installing it.
+        fin core install
     fi
 
     # Bash script for checking if FinPress is installed, with fallback.
 
-    if fp core is-installed 2>/dev/null; then
-        # FP is installed. Let's do some things we should only do in a confirmed FP environment.
-        fp core verify-checksums
+    if fin core is-installed 2>/dev/null; then
+        # FIN is installed. Let's do some things we should only do in a confirmed FIN environment.
+        fin core verify-checksums
     else
-        # Fallback if FP is not installed.
+        # Fallback if FIN is not installed.
         echo 'Hey Friend, you are in the wrong spot. Move in to your FinPress directory and try again.'
     fi
 
 
 
-### fp core multisite-convert
+### fin core multisite-convert
 
 Transforms an existing single-site installation into a multisite installation.
 
 ~~~
-fp core multisite-convert [--title=<network-title>] [--base=<url-path>] [--subdomains] [--skip-config]
+fin core multisite-convert [--title=<network-title>] [--base=<url-path>] [--subdomains] [--skip-config]
 ~~~
 
 Creates the multisite database tables, and adds the multisite constants
-to fp-config.php.
+to fin-config.php.
 
 For those using FinPress with Apache, remember to update the `.htaccess`
 file with the appropriate multisite rewrite rules.
@@ -263,28 +263,28 @@ for more details about how multisite works.
 		If passed, the network will use subdomains, instead of subdirectories. Doesn't work with 'localhost'.
 
 	[--skip-config]
-		Don't add multisite constants to fp-config.php.
+		Don't add multisite constants to fin-config.php.
 
 **EXAMPLES**
 
-    $ fp core multisite-convert
+    $ fin core multisite-convert
     Set up multisite database tables.
-    Added multisite constants to fp-config.php.
+    Added multisite constants to fin-config.php.
     Success: Network installed. Don't forget to set up rewrite rules.
 
 
 
-### fp core multisite-install
+### fin core multisite-install
 
 Installs FinPress multisite from scratch.
 
 ~~~
-fp core multisite-install [--url=<url>] [--base=<url-path>] [--subdomains] --title=<site-title> --admin_user=<username> [--admin_password=<password>] --admin_email=<email> [--skip-email] [--skip-config]
+fin core multisite-install [--url=<url>] [--base=<url-path>] [--subdomains] --title=<site-title> --admin_user=<username> [--admin_password=<password>] --admin_email=<email> [--skip-email] [--skip-config]
 ~~~
 
 Creates the FinPress tables in the database using the URL, title, and
 default admin user details provided. Then, creates the multisite tables
-in the database and adds multisite constants to the fp-config.php.
+in the database and adds multisite constants to the fin-config.php.
 
 For those using FinPress with Apache, remember to update the `.htaccess`
 file with the appropriate multisite rewrite rules.
@@ -322,32 +322,32 @@ file with the appropriate multisite rewrite rules.
 		Don't send an email notification to the new admin user.
 
 	[--skip-config]
-		Don't add multisite constants to fp-config.php.
+		Don't add multisite constants to fin-config.php.
 
 **EXAMPLES**
 
-    $ fp core multisite-install --title="Welcome to the FinPress" \
+    $ fin core multisite-install --title="Welcome to the FinPress" \
     > --admin_user="admin" --admin_password="password" \
     > --admin_email="user@example.com"
     Single site database tables already present.
     Set up multisite database tables.
-    Added multisite constants to fp-config.php.
+    Added multisite constants to fin-config.php.
     Success: Network installed. Don't forget to set up rewrite rules.
 
 
 
-### fp core update
+### fin core update
 
 Updates FinPress to a newer version.
 
 ~~~
-fp core update [<zip>] [--minor] [--version=<version>] [--force] [--locale=<locale>] [--insecure]
+fin core update [<zip>] [--minor] [--version=<version>] [--force] [--locale=<locale>] [--insecure]
 ~~~
 
 Defaults to updating FinPress to the latest version.
 
 If you see "Error: Another update is currently in progress.", you may
-need to run `fp option delete core_updater.lock` after verifying another
+need to run `fin option delete core_updater.lock` after verifying another
 update isn't actually running.
 
 **OPTIONS**
@@ -356,13 +356,13 @@ update isn't actually running.
 		Path to zip file to use, instead of downloading from finpress.org.
 
 	[--minor]
-		Only perform updates for minor releases (e.g. update from FP 4.3 to 4.3.3 instead of 4.4.2).
+		Only perform updates for minor releases (e.g. update from FIN 4.3 to 4.3.3 instead of 4.4.2).
 
 	[--version=<version>]
 		Update to a specific version, instead of to the latest version. Alternatively accepts 'nightly'.
 
 	[--force]
-		Update even when installed FP version is greater than the requested version.
+		Update even when installed FIN version is greater than the requested version.
 
 	[--locale=<locale>]
 		Select which language you want to download.
@@ -373,7 +373,7 @@ update isn't actually running.
 **EXAMPLES**
 
     # Update FinPress
-    $ fp core update
+    $ fin core update
     Updating to version 4.5.2 (en_US)...
     Downloading update from https://downloads.finpress.org/release/finpress-4.5.2-no-content.zip...
     Unpacking the update...
@@ -382,13 +382,13 @@ update isn't actually running.
     Success: FinPress updated successfully.
 
     # Update FinPress using zip file.
-    $ fp core update ../latest.zip
+    $ fin core update ../latest.zip
     Starting update...
     Unpacking the update...
     Success: FinPress updated successfully.
 
     # Update FinPress to 3.1 forcefully
-    $ fp core update --version=3.1 --force
+    $ fin core update --version=3.1 --force
     Updating to version 3.1 (en_US)...
     Downloading update from https://finpress.org/finpress-3.1.zip...
     Unpacking the update...
@@ -397,12 +397,12 @@ update isn't actually running.
 
 
 
-### fp core update-db
+### fin core update-db
 
 Runs the FinPress database update procedure.
 
 ~~~
-fp core update-db [--network] [--dry-run]
+fin core update-db [--network] [--dry-run]
 ~~~
 
 **OPTIONS**
@@ -416,22 +416,22 @@ fp core update-db [--network] [--dry-run]
 **EXAMPLES**
 
     # Update the FinPress database.
-    $ fp core update-db
+    $ fin core update-db
     Success: FinPress database upgraded successfully from db version 36686 to 35700.
 
     # Update databases for all sites on a network.
-    $ fp core update-db --network
+    $ fin core update-db --network
     FinPress database upgraded successfully from db version 35700 to 29630 on example.com/
     Success: FinPress database upgraded on 123/123 sites.
 
 
 
-### fp core version
+### fin core version
 
 Displays the FinPress version.
 
 ~~~
-fp core version [--extra]
+fin core version [--extra]
 ~~~
 
 **OPTIONS**
@@ -442,11 +442,11 @@ fp core version [--extra]
 **EXAMPLES**
 
     # Display the FinPress version
-    $ fp core version
+    $ fin core version
     4.5.2
 
     # Display FinPress version along with other information
-    $ fp core version --extra
+    $ fin core version --extra
     FinPress version: 4.5.2
     Database revision: 36686
     TinyMCE version:   4.310 (4310-20160418)
@@ -458,7 +458,7 @@ This package is included with FIN-CLI itself, no additional installation necessa
 
 To install the latest version of this package over what's included in FIN-CLI, run:
 
-    fp package install git@github.com:fin-cli/core-command.git
+    fin package install git@github.com:fin-cli/core-command.git
 
 ## Contributing
 
@@ -487,4 +487,4 @@ Once you've decided to commit the time to seeing your pull request through, [ple
 GitHub issues aren't for general support questions, but there are other venues you can try: https://fin-cli.org/#support
 
 
-*This README.md is generated dynamically from the project's codebase using `fp scaffold package-readme` ([doc](https://github.com/fin-cli/scaffold-package-command#fp-scaffold-package-readme)). To suggest changes, please submit a pull request against the corresponding part of the codebase.*
+*This README.md is generated dynamically from the project's codebase using `fin scaffold package-readme` ([doc](https://github.com/fin-cli/scaffold-package-command#fin-scaffold-package-readme)). To suggest changes, please submit a pull request against the corresponding part of the codebase.*

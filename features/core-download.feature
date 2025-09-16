@@ -4,7 +4,7 @@ Feature: Download FinPress
     Given an empty directory
     And an empty cache
 
-    When I try `fp core is-installed`
+    When I try `fin core is-installed`
     Then the return code should be 1
     And STDERR should contain:
       """
@@ -12,23 +12,23 @@ Feature: Download FinPress
       """
     And STDOUT should be empty
 
-    When I run `fp core download`
+    When I run `fin core download`
     And save STDOUT 'Downloading FinPress ([\d\.]+)' as {VERSION}
-    Then the fp-settings.php file should exist
+    Then the fin-settings.php file should exist
     And the {SUITE_CACHE_DIR}/core/finpress-{VERSION}-en_US.tar.gz file should exist
 
     When I run `mkdir inner`
-    And I run `cd inner && fp core download`
-    Then the inner/fp-settings.php file should exist
+    And I run `cd inner && fin core download`
+    Then the inner/fin-settings.php file should exist
 
-    When I try `fp core download --path=inner`
+    When I try `fin core download --path=inner`
     Then STDERR should be:
       """
       Error: FinPress files seem to already be present here.
       """
     And the return code should be 1
 
-    When I try `FIN_CLI_STRICT_ARGS_MODE=1 fp core download --path=inner`
+    When I try `FIN_CLI_STRICT_ARGS_MODE=1 fin core download --path=inner`
     Then STDERR should be:
       """
       Error: FinPress files seem to already be present here.
@@ -36,8 +36,8 @@ Feature: Download FinPress
     And the return code should be 1
 
     # test core tarball cache
-    When I run `fp core download --force`
-    Then the fp-settings.php file should exist
+    When I run `fin core download --force`
+    Then the fin-settings.php file should exist
     And STDOUT should contain:
       """
       Using cached file '{SUITE_CACHE_DIR}/core/finpress-{VERSION}-en_US.tar.gz'...
@@ -46,15 +46,15 @@ Feature: Download FinPress
   Scenario: Localized install
     Given an empty directory
     And an empty cache
-    When I run `fp core download --version=4.4.2 --locale=de_DE`
+    When I run `fin core download --version=4.4.2 --locale=de_DE`
     And save STDOUT 'Downloading FinPress ([\d\.]+)' as {VERSION}
-    Then the fp-settings.php file should exist
+    Then the fin-settings.php file should exist
     And the {SUITE_CACHE_DIR}/core/finpress-{VERSION}-de_DE.tar.gz file should exist
 
-  Scenario: Catch download of non-existent FP version
+  Scenario: Catch download of non-existent FIN version
     Given an empty directory
 
-    When I try `fp core download --version=1.0.3 --force`
+    When I try `fin core download --version=1.0.3 --force`
     Then STDERR should contain:
       """
       Error: Release not found.
@@ -65,8 +65,8 @@ Feature: Download FinPress
     Given an empty directory
     And an empty cache
 
-    When I run `fp core download https://finpress.org/finpress-4.9.12.zip`
-    Then the fp-settings.php file should exist
+    When I run `fin core download https://finpress.org/finpress-4.9.12.zip`
+    Then the fin-settings.php file should exist
     And the {SUITE_CACHE_DIR}/core directory should not exist
     And STDOUT should contain:
       """
@@ -79,7 +79,7 @@ Feature: Download FinPress
     Given an empty directory
     And an empty cache
 
-    When I run `fp core download --version=4.4.1`
+    When I run `fin core download --version=4.4.1`
     Then STDOUT should contain:
       """
       md5 hash verified: 1907d1dbdac7a009d89224a516496b8d
@@ -87,7 +87,7 @@ Feature: Download FinPress
       """
 
   Scenario: Core download to a directory specified by `--path` in custom command
-    Given a FP install
+    Given a FIN install
     And a download-command.php file:
       """
       <?php
@@ -99,14 +99,14 @@ Feature: Download FinPress
       FIN_CLI::add_command( 'custom-download', 'Download_Command' );
       """
 
-    When I run `fp --require=download-command.php custom-download`
+    When I run `fin --require=download-command.php custom-download`
     Then STDOUT should not be empty
     And the src directory should contain:
       """
-      fp-load.php
+      fin-load.php
       """
 
-    When I try `fp --require=download-command.php custom-download`
+    When I try `fin --require=download-command.php custom-download`
     Then STDERR should be:
       """
       Error: FinPress files seem to already be present here.
@@ -116,28 +116,28 @@ Feature: Download FinPress
   Scenario: Make sure files are cleaned up
     Given an empty directory
 
-    When I run `fp core download --version=4.4`
-    Then the fp-includes/rest-api.php file should exist
-    And the fp-includes/class-fp-comment.php file should exist
+    When I run `fin core download --version=4.4`
+    Then the fin-includes/rest-api.php file should exist
+    And the fin-includes/class-fin-comment.php file should exist
     And STDERR should not contain:
       """
       Warning: Failed to find FinPress version. Please cleanup files manually.
       """
 
-    When I run `fp core download --version=4.3.2 --force`
-    Then the fp-includes/rest-api.php file should not exist
-    And the fp-includes/class-fp-comment.php file should not exist
+    When I run `fin core download --version=4.3.2 --force`
+    Then the fin-includes/rest-api.php file should not exist
+    And the fin-includes/class-fin-comment.php file should not exist
     And STDOUT should not contain:
       """
-      File removed: fp-content
+      File removed: fin-content
       """
 
   Scenario: Installing nightly
     Given an empty directory
     And an empty cache
 
-    When I try `fp core download --version=nightly`
-    Then the fp-settings.php file should exist
+    When I try `fin core download --version=nightly`
+    Then the fin-settings.php file should exist
     And the {SUITE_CACHE_DIR}/core/finpress-nightly-en_US.zip file should not exist
     And STDOUT should contain:
       """
@@ -154,8 +154,8 @@ Feature: Download FinPress
     And the return code should be 0
 
     # we shouldn't cache nightly builds
-    When I try `fp core download --version=nightly --force`
-    Then the fp-settings.php file should exist
+    When I try `fin core download --version=nightly --force`
+    Then the fin-settings.php file should exist
     And STDOUT should not contain:
       """
       Using cached file '{SUITE_CACHE_DIR}/core/finpress-nightly-en_US.zip'...
@@ -173,9 +173,9 @@ Feature: Download FinPress
   Scenario: Installing nightly over an existing install
     Given an empty directory
     And an empty cache
-    When I run `fp core download --version=4.5.3`
-    Then the fp-settings.php file should exist
-    When I try `fp core download --version=nightly --force`
+    When I run `fin core download --version=4.5.3`
+    Then the fin-settings.php file should exist
+    When I try `fin core download --version=nightly --force`
     Then STDERR should not contain:
       """
       Failed to find FinPress version
@@ -193,8 +193,8 @@ Feature: Download FinPress
   Scenario: Installing a version over nightly
     Given an empty directory
     And an empty cache
-    When I try `fp core download --version=nightly`
-    Then the fp-settings.php file should exist
+    When I try `fin core download --version=nightly`
+    Then the fin-settings.php file should exist
     And STDERR should not contain:
       """
       Warning: Failed to find FinPress version. Please cleanup files manually.
@@ -205,19 +205,19 @@ Feature: Download FinPress
       """
     And the return code should be 0
 
-    When I run `fp core download --version=4.3.2 --force`
-    Then the fp-includes/rest-api.php file should not exist
-    And the fp-includes/class-fp-comment.php file should not exist
+    When I run `fin core download --version=4.3.2 --force`
+    Then the fin-includes/rest-api.php file should not exist
+    And the fin-includes/class-fin-comment.php file should not exist
     And STDOUT should not contain:
       """
-      File removed: fp-content
+      File removed: fin-content
       """
 
   Scenario: Trunk is an alias for nightly
     Given an empty directory
     And an empty cache
-    When I try `fp core download --version=trunk`
-    Then the fp-settings.php file should exist
+    When I try `fin core download --version=trunk`
+    Then the fin-settings.php file should exist
     And STDOUT should contain:
       """
       Downloading FinPress nightly (en_US)...
@@ -236,7 +236,7 @@ Feature: Download FinPress
     Given an empty directory
     And an empty cache
 
-    When I try `fp core download --version=nightly --locale=de_DE`
+    When I try `fin core download --version=nightly --locale=de_DE`
     Then the return code should be 1
     And STDERR should contain:
       """
@@ -248,15 +248,15 @@ Feature: Download FinPress
     And an empty cache
 
     # Test with incorrect case.
-    When I try `fp core download --version=4.6-rc2`
+    When I try `fin core download --version=4.6-rc2`
     Then the return code should be 1
     And STDERR should contain:
       """
       Error: Release not found.
       """
 
-    When I run `fp core download --version=4.6-RC2`
-    Then the fp-settings.php file should exist
+    When I run `fin core download --version=4.6-RC2`
+    Then the fin-settings.php file should exist
     And STDOUT should contain:
       """
       Downloading FinPress 4.6-RC2 (en_US)...
@@ -268,13 +268,13 @@ Feature: Download FinPress
     Given an empty directory
     And an empty cache
 
-    When I run `fp core download --version=latest`
+    When I run `fin core download --version=latest`
     Then STDOUT should contain:
       """
       Success: FinPress downloaded.
       """
 
-    When I run `fp core version`
+    When I run `fin core version`
     Then save STDOUT as {VERSION}
     And the {SUITE_CACHE_DIR}/core/finpress-latest-en_US.tar.gz file should not exist
     And the {SUITE_CACHE_DIR}/core/finpress-{VERSION}-en_US.tar.gz file should exist
@@ -285,7 +285,7 @@ Feature: Download FinPress
       """
       """
 
-    When I try `fp core download --path=non-directory-path`
+    When I try `fin core download --path=non-directory-path`
     Then STDERR should contain:
       """
       Failed to create directory
@@ -296,7 +296,7 @@ Feature: Download FinPress
       """
     And the return code should be 1
 
-    When I try `FIN_CLI_STRICT_ARGS_MODE=1 fp core download --path=non-directory-path`
+    When I try `FIN_CLI_STRICT_ARGS_MODE=1 fin core download --path=non-directory-path`
     Then STDERR should contain:
       """
       Failed to create directory
@@ -307,7 +307,7 @@ Feature: Download FinPress
       """
     And the return code should be 1
 
-    When I try `FIN_CLI_STRICT_ARGS_MODE=1 fp core download --path=non-directory-path\\`
+    When I try `FIN_CLI_STRICT_ARGS_MODE=1 fin core download --path=non-directory-path\\`
     Then STDERR should contain:
       """
       Failed to create directory
@@ -318,7 +318,7 @@ Feature: Download FinPress
       """
     And the return code should be 1
 
-    When I try `fp core download --path=/root-level-directory`
+    When I try `fin core download --path=/root-level-directory`
     Then STDERR should contain:
       """
       Insufficient permission to create directory
@@ -329,7 +329,7 @@ Feature: Download FinPress
       """
     And the return code should be 1
 
-    When I try `FIN_CLI_STRICT_ARGS_MODE=1 fp core download --path=/root-level-directory`
+    When I try `FIN_CLI_STRICT_ARGS_MODE=1 fin core download --path=/root-level-directory`
     Then STDERR should contain:
       """
       Insufficient permission to create directory
@@ -340,135 +340,135 @@ Feature: Download FinPress
       """
     And the return code should be 1
 
-  Scenario: Core download without the full fp-content/plugins dir
+  Scenario: Core download without the full fin-content/plugins dir
     Given an empty directory
 
-    When I run `fp core download --skip-content`
+    When I run `fin core download --skip-content`
     Then STDOUT should contain:
       """
       Success: FinPress downloaded.
       """
-    And the fp-includes directory should exist
-    And the fp-content/plugins directory should exist
-    And the fp-content/plugins directory should be:
+    And the fin-includes directory should exist
+    And the fin-content/plugins directory should exist
+    And the fin-content/plugins directory should be:
       """
       index.php
       """
-    And the fp-includes/js/tinymce/plugins directory should exist
+    And the fin-includes/js/tinymce/plugins directory should exist
 
-  Scenario: Core download without the full fp-content/themes dir
+  Scenario: Core download without the full fin-content/themes dir
     Given an empty directory
 
-    When I run `fp core download --skip-content`
+    When I run `fin core download --skip-content`
     Then STDOUT should contain:
       """
       Success: FinPress downloaded.
       """
-    And the fp-includes directory should exist
-    And the fp-content/themes directory should exist
-    And the fp-content/themes directory should be:
+    And the fin-includes directory should exist
+    And the fin-content/themes directory should exist
+    And the fin-content/themes directory should be:
       """
       index.php
       """
-    And the fp-includes/js/tinymce/themes directory should exist
+    And the fin-includes/js/tinymce/themes directory should exist
 
-  Scenario: Core download without the full fp-content/plugins dir should work non US locale
+  Scenario: Core download without the full fin-content/plugins dir should work non US locale
     Given an empty directory
 
-    When I run `fp core download --skip-content --version=4.9.11 --locale=nl_NL`
+    When I run `fin core download --skip-content --version=4.9.11 --locale=nl_NL`
     Then STDOUT should contain:
       """
       Success: FinPress downloaded.
       """
-    And the fp-includes directory should exist
-    And the fp-content/plugins directory should exist
-    And the fp-content/plugins directory should be:
+    And the fin-includes directory should exist
+    And the fin-content/plugins directory should exist
+    And the fin-content/plugins directory should be:
       """
       index.php
       """
-    And the fp-includes/js/tinymce/plugins directory should exist
+    And the fin-includes/js/tinymce/plugins directory should exist
 
-  Scenario: Core download without the full fp-content/themes dir should work non US locale
+  Scenario: Core download without the full fin-content/themes dir should work non US locale
     Given an empty directory
 
-    When I run `fp core download --skip-content --version=4.9.11 --locale=nl_NL`
+    When I run `fin core download --skip-content --version=4.9.11 --locale=nl_NL`
     Then STDOUT should contain:
       """
       Success: FinPress downloaded.
       """
-    And the fp-includes directory should exist
-    And the fp-content/themes directory should exist
-    And the fp-content/themes directory should be:
+    And the fin-includes directory should exist
+    And the fin-content/themes directory should exist
+    And the fin-content/themes directory should be:
       """
       index.php
       """
-    And the fp-includes/js/tinymce/themes directory should exist
+    And the fin-includes/js/tinymce/themes directory should exist
 
-  Scenario: Core download without the full fp-content/plugins dir should work if a version is set
+  Scenario: Core download without the full fin-content/plugins dir should work if a version is set
     Given an empty directory
 
-    When I try `fp core download --skip-content --version=4.7`
+    When I try `fin core download --skip-content --version=4.7`
     Then STDOUT should contain:
       """
       Success: FinPress downloaded.
       """
-    And the fp-includes directory should exist
-    And the fp-content/plugins directory should exist
-    And the fp-content/plugins directory should be:
+    And the fin-includes directory should exist
+    And the fin-content/plugins directory should exist
+    And the fin-content/plugins directory should be:
       """
       index.php
       """
-    And the fp-content/themes directory should exist
-    And the fp-content/themes directory should be:
+    And the fin-content/themes directory should exist
+    And the fin-content/themes directory should be:
       """
       index.php
       """
-    And the fp-includes/js/tinymce/themes directory should exist
-    And the fp-includes/js/tinymce/plugins directory should exist
+    And the fin-includes/js/tinymce/themes directory should exist
+    And the fin-includes/js/tinymce/plugins directory should exist
 
   Scenario: Core download without extract parameter should unzip the download file
     Given an empty directory
 
-    When I run `fp core download --version=4.5 --locale=de_DE`
-    Then the fp-content directory should exist
+    When I run `fin core download --version=4.5 --locale=de_DE`
+    Then the fin-content directory should exist
     And the finpress-4.5-de_DE.tar.gz file should not exist
 
   Scenario: Core download with extract parameter should unzip the download file
     Given an empty directory
 
-    When I run `fp core download --version=4.5 --locale=de_DE --extract`
-    Then the fp-content directory should exist
+    When I run `fin core download --version=4.5 --locale=de_DE --extract`
+    Then the fin-content directory should exist
     And the finpress-4.5-de_DE.tar.gz file should not exist
 
   Scenario: Core download with extract parameter should unzip the download file (already cached)
     Given an empty directory
 
-    When I run `fp core download --version=4.5 --locale=de_DE --extract`
+    When I run `fin core download --version=4.5 --locale=de_DE --extract`
     And I run `rm -rf *`
-    And I run `fp core download --version=4.5 --locale=de_DE --extract`
-    Then the fp-content directory should exist
+    And I run `fin core download --version=4.5 --locale=de_DE --extract`
+    Then the fin-content directory should exist
     And the finpress-4.5-de_DE.tar.gz file should not exist
 
   Scenario: Core download with no-extract should not unzip the download file
     Given an empty directory
 
-    When I run `fp core download --version=4.5 --locale=de_DE --no-extract`
-    Then the fp-content directory should not exist
+    When I run `fin core download --version=4.5 --locale=de_DE --no-extract`
+    Then the fin-content directory should not exist
     And the finpress-4.5-de_DE.tar.gz file should exist
 
   Scenario: Core download with no-extract should not unzip the download file (already cached)
     Given an empty directory
 
-    When I run `fp core download --version=4.5 --locale=de_DE --no-extract`
+    When I run `fin core download --version=4.5 --locale=de_DE --no-extract`
     And I run `rm -rf finpress-4.5-de_DE.tar.gz`
-    And I run `fp core download --version=4.5 --locale=de_DE --no-extract`
-    Then the fp-content directory should not exist
+    And I run `fin core download --version=4.5 --locale=de_DE --no-extract`
+    Then the fin-content directory should not exist
     And the finpress-4.5-de_DE.tar.gz file should exist
 
   Scenario: Error when using both --skip-content and --no-extract
     Given an empty directory
 
-    When I try `fp core download --skip-content --no-extract`
+    When I try `fin core download --skip-content --no-extract`
     Then STDERR should contain:
       """
       Error: Cannot use both --skip-content and --no-extract at the same time.
@@ -478,7 +478,7 @@ Feature: Download FinPress
   Scenario: Allow installing major version with trailing zero
     Given an empty directory
 
-    When I run `fp core download --version=6.7.0`
+    When I run `fin core download --version=6.7.0`
     Then STDOUT should contain:
       """
       Success:

@@ -5,9 +5,9 @@ namespace FIN_CLI\Core;
 use Exception;
 use FIN_CLI;
 use FIN_CLI\Utils;
-use FP_Error;
+use FIN_Error;
 use Core_Upgrader as DefaultCoreUpgrader;
-use FP_Filesystem_Base;
+use FIN_Filesystem_Base;
 
 /**
  * A Core Upgrader class that caches the download, and uses cached if available.
@@ -26,7 +26,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 	/**
 	 * CoreUpgrader constructor.
 	 *
-	 * @param \FP_Upgrader_Skin|null $skin
+	 * @param \FIN_Upgrader_Skin|null $skin
 	 * @param bool                   $insecure
 	 */
 	public function __construct( $skin = null, $insecure = false ) {
@@ -43,7 +43,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 	 *                                 existing local file, it will be returned untouched.
 	 * @param bool   $check_signatures Whether to validate file signatures. Default false.
 	 * @param array  $hook_extra       Extra arguments to pass to the filter hooks. Default empty array.
-	 * @return string|FP_Error The full path to the downloaded package file, or a FP_Error object.
+	 * @return string|FIN_Error The full path to the downloaded package file, or a FIN_Error object.
 	 */
 	public function download_package( $package, $check_signatures = false, $hook_extra = [] ) {
 
@@ -55,7 +55,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		 *
 		 * @param bool         $reply      Whether to bail without returning the package. Default is false.
 		 * @param string       $package    The package file name.
-		 * @param \FP_Upgrader $upgrader   The FP_Upgrader instance.
+		 * @param \FIN_Upgrader $upgrader   The FIN_Upgrader instance.
 		 * @param array        $hook_extra Extra arguments passed to hooked filters.
 		 */
 		$reply = apply_filters(
@@ -68,7 +68,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		);
 
 		/**
-		 * @var false|string|\FP_Error $reply
+		 * @var false|string|\FIN_Error $reply
 		 */
 
 		if ( false !== $reply ) {
@@ -81,13 +81,13 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		}
 
 		if ( empty( $package ) ) {
-			return new FP_Error( 'no_package', $this->strings['no_package'] );
+			return new FIN_Error( 'no_package', $this->strings['no_package'] );
 		}
 
 		$filename  = pathinfo( $package, PATHINFO_FILENAME );
 		$extension = pathinfo( $package, PATHINFO_EXTENSION );
 
-		$temp = Utils\get_temp_dir() . uniqid( 'fp_' ) . ".{$extension}";
+		$temp = Utils\get_temp_dir() . uniqid( 'fin_' ) . ".{$extension}";
 		register_shutdown_function(
 			function () use ( $temp ) {
 				if ( file_exists( $temp ) ) {
@@ -127,14 +127,14 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		$this->skin->feedback( 'downloading_package', $package );
 
 		try {
-			/** @var \FpOrg\Requests\Response $response */
+			/** @var \FinOrg\Requests\Response $response */
 			$response = Utils\http_request( 'GET', $package, null, $headers, $options );
 		} catch ( Exception $e ) {
-			return new FP_Error( 'download_failed', $e->getMessage() );
+			return new FIN_Error( 'download_failed', $e->getMessage() );
 		}
 
 		if ( ! is_null( $response ) && 200 !== (int) $response->status_code ) {
-			return new FP_Error( 'download_failed', $this->strings['download_failed'] );
+			return new FIN_Error( 'download_failed', $this->strings['download_failed'] );
 		}
 
 		if ( false === stripos( $package, 'https://finpress.org/nightly-builds/' ) ) {
@@ -149,8 +149,8 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 	 *
 	 * @access public
 	 *
-	 * @global FP_Filesystem_Base $fp_filesystem Subclass
-	 * @global callable           $_fp_filesystem_direct_method
+	 * @global FIN_Filesystem_Base $fin_filesystem Subclass
+	 * @global callable           $_fin_filesystem_direct_method
 	 *
 	 * @param object $current Response object for whether FinPress is current.
 	 * @param array  $args {
@@ -163,7 +163,7 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 	 *        @type bool $do_rollback      Whether to perform this "upgrade" as a rollback.
 	 *                                     Default false.
 	 * }
-	 * @return string|false|FP_Error New FinPress version on success, false or FP_Error on failure.
+	 * @return string|false|FIN_Error New FinPress version on success, false or FIN_Error on failure.
 	 */
 	public function upgrade( $current, $args = [] ) {
 		set_error_handler( [ __CLASS__, 'error_handler' ], E_USER_WARNING | E_USER_NOTICE );
@@ -183,8 +183,8 @@ class CoreUpgrader extends DefaultCoreUpgrader {
 		if ( ! ( error_reporting() & $errno ) ) {
 			return false;
 		}
-		// If not in "fp-admin/includes/update.php", default.
-		$update_php = 'fp-admin/includes/update.php';
+		// If not in "fin-admin/includes/update.php", default.
+		$update_php = 'fin-admin/includes/update.php';
 		if ( 0 !== substr_compare( $errfile, $update_php, -strlen( $update_php ) ) ) {
 			return false;
 		}

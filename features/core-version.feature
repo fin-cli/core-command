@@ -1,16 +1,16 @@
 Feature: Find version for FinPress install
 
   Scenario: Verify core version
-    Given a FP install
-    And I run `fp core download --version=4.4.2 --force`
+    Given a FIN install
+    And I run `fin core download --version=4.4.2 --force`
 
-    When I run `fp core version`
+    When I run `fin core version`
     Then STDOUT should be:
       """
       4.4.2
       """
 
-    When I run `fp core version --extra`
+    When I run `fin core version --extra`
     Then STDOUT should be:
       """
       FinPress version: 4.4.2
@@ -23,13 +23,13 @@ Feature: Find version for FinPress install
     Given an empty directory
     And an empty cache
 
-    When I run `fp core download --version=4.4.2 --locale=de_DE`
+    When I run `fin core download --version=4.4.2 --locale=de_DE`
     Then STDOUT should contain:
       """
       Success: FinPress downloaded.
       """
 
-    When I run `fp core version --extra`
+    When I run `fin core version --extra`
     Then STDOUT should be:
       """
       FinPress version: 4.4.2
